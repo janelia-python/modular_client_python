@@ -1,15 +1,13 @@
 from __future__ import print_function, division
 import serial
-import math
 import time
 import atexit
-import os
 import json
 import functools
-import platform
 import operator
+import platform
 
-from serial_device import SerialDevice, SerialDevices, findSerialDevicePorts, WriteFrequencyError
+from serial_device import SerialDevice, SerialDevices, find_serial_device_ports, WriteFrequencyError
 
 
 DEBUG = False
@@ -46,61 +44,61 @@ class ArduinoDevice(SerialDevice):
         if 'serial_number' in kwargs:
             serial_number = kwargs.pop('serial_number')
         if ('port' not in kwargs) or (kwargs['port'] is None):
-            port =  findArduinoDevicePort(baudrate=kwargs['baudrate'],
-                                          model_number=model_number,
-                                          serial_number=serial_number,
-                                          try_ports=try_ports,
-                                          debug=kwargs['debug'])
+            port =  find_arduino_device_port(baudrate=kwargs['baudrate'],
+                                             model_number=model_number,
+                                             serial_number=serial_number,
+                                             try_ports=try_ports,
+                                             debug=kwargs['debug'])
             kwargs.update({'port': port})
 
         t_start = time.time()
         super(ArduinoDevice,self).__init__(*args,**kwargs)
-        atexit.register(self._exitArduinoDevice)
+        atexit.register(self._exit_arduino_device)
         time.sleep(self.RESET_DELAY)
         self.rsp_dict = None
-        self.rsp_dict = self._getRspDict()
-        self.cmd_dict = self._getCmdDict()
+        self.rsp_dict = self._get_rsp_dict()
+        self.cmd_dict = self._get_cmd_dict()
         self.cmd_dict_inv = dict([(v,k) for (k,v) in self.cmd_dict.iteritems()])
-        self._createCmds()
+        self._create_cmds()
         dev_info = self.getDevInfo()
         self.model_number = dev_info['model_number']
         self.serial_number = dev_info['serial_number']
         self.firmware_number = dev_info['firmware_number']
         t_end = time.time()
-        self.debugPrint('Initialization time =', (t_end - t_start))
+        self.debug_print('Initialization time =', (t_end - t_start))
 
-    def _exitArduinoDevice(self):
+    def _exit_arduino_device(self):
         pass
 
-    def _argsToCmdStr(self,*args):
+    def _args_to_cmd_str(self,*args):
         cmd_list = ['[', ','.join(map(str,args)), ']']
         cmd_str = ''.join(cmd_list)
         return cmd_str
 
-    def _sendCmd(self,*args):
+    def _send_cmd(self,*args):
 
         '''Sends Arduino command to device over serial port and
         returns number of bytes written'''
 
-        cmd_str = self._argsToCmdStr(*args)
-        self.debugPrint('cmd_str', cmd_str)
-        bytes_written = self.writeCheckFreq(cmd_str,delay_write=True)
+        cmd_str = self._args_to_cmd_str(*args)
+        self.debug_print('cmd_str', cmd_str)
+        bytes_written = self.write_check_freq(cmd_str,delay_write=True)
         return bytes_written
 
-    def _sendCmdGetRsp(self,*args):
+    def _send_cmd_get_rsp(self,*args):
 
         '''Sends Arduino command to device over serial port and
         returns response'''
 
-        cmd_str = self._argsToCmdStr(*args)
-        self.debugPrint('cmd_str', cmd_str)
-        rsp_str = self.writeRead(cmd_str,use_readline=True,check_write_freq=True)
+        cmd_str = self._args_to_cmd_str(*args)
+        self.debug_print('cmd_str', cmd_str)
+        rsp_str = self.write_read(cmd_str,use_readline=True,check_write_freq=True)
         if rsp_str is None:
             rsp_dict = {}
             return rsp_dict
-        self.debugPrint('rsp_str', rsp_str)
+        self.debug_print('rsp_str', rsp_str)
         try:
-            rsp_dict = jsonStrToDict(rsp_str)
+            rsp_dict = json_str_to_dict(rsp_str)
         except Exception, e:
             err_msg = 'Unable to parse device response {0}.'.format(str(e))
             raise IOError, err_msg
@@ -126,23 +124,23 @@ class ArduinoDevice(SerialDevice):
                 raise IOError, err_msg
         return rsp_dict
 
-    def getArduinoSerialNumber(self):
+    def get_arduino_serial_number(self):
         dev_info = self.getDevInfo()
         self.serial_number = dev_info['serial_number']
         return self.serial_number
 
-    def getArduinoModelNumber(self):
+    def get_arduino_model_number(self):
         dev_info = self.getDevInfo()
         self.model_number = dev_info['model_number']
         return self.model_number
 
-    def getArduinoFirmwareNumber(self):
+    def get_arduino_firmware_number(self):
         dev_info = self.getDevInfo()
         self.firmware_number = dev_info['firmware_number']
         return self.firmware_number
 
-    def getArduinoDeviceInfo(self):
-        arduino_device_info = self.getSerialDeviceInfo()
+    def get_arduino_device_info(self):
+        arduino_device_info = self.get_serial_device_info()
         dev_info = self.getDevInfo()
         self.model_number = dev_info['model_number']
         self.serial_number = dev_info['serial_number']
@@ -153,55 +151,55 @@ class ArduinoDevice(SerialDevice):
                                     })
         return arduino_device_info
 
-    def _getCmdDict(self):
-        cmd_dict = self._sendCmdGetRsp(self.CMD_GET_CMDS)
+    def _get_cmd_dict(self):
+        cmd_dict = self._send_cmd_get_rsp(self.CMD_GET_CMDS)
         return cmd_dict
 
-    def getCommands(self):
+    def get_arduino_commands(self):
         return self.cmd_dict.keys()
 
-    def _getRspDict(self):
-        rsp_dict = self._sendCmdGetRsp(self.CMD_GET_RSP_CODES)
-        checkDictForKey(rsp_dict,'rsp_success',dname='rsp_dict')
-        checkDictForKey(rsp_dict,'rsp_error',dname='rsp_dict')
+    def _get_rsp_dict(self):
+        rsp_dict = self._send_cmd_get_rsp(self.CMD_GET_RSP_CODES)
+        check_dict_for_key(rsp_dict,'rsp_success',dname='rsp_dict')
+        check_dict_for_key(rsp_dict,'rsp_error',dname='rsp_dict')
         return rsp_dict
 
-    def _sendCmdByName(self,name,*args):
+    def _send_cmd_by_name(self,name,*args):
         cmd_id = self.cmd_dict[name]
         cmd_args = [cmd_id]
         cmd_args.extend(args)
-        rsp = self._sendCmdGetRsp(*cmd_args)
+        rsp = self._send_cmd_get_rsp(*cmd_args)
         return rsp
 
-    def _sendAllCmds(self):
+    def _send_all_cmds(self):
         print('\nSend All Commands')
         print('-------------------')
         for cmd_id, cmd_name in sorted(self.cmd_dict_inv.iteritems()):
             print('cmd: {0}, {1}'.format(cmd_name,cmd_id))
-            rsp = self._sendCmdGetRsp(cmd_id)
+            rsp = self._send_cmd_get_rsp(cmd_id)
             print('rsp: {0}'.format(rsp))
             print()
         print()
 
-    def _cmdFuncBase(self,cmd_name,*args):
+    def _cmd_func_base(self,cmd_name,*args):
         if len(args) == 1 and type(args[0]) is dict:
             args_dict = args[0]
-            args_list = self._argsDictToList(args_dict)
+            args_list = self._args_dict_to_list(args_dict)
         else:
             args_list = args
-        rsp_dict = self._sendCmdByName(cmd_name,*args_list)
+        rsp_dict = self._send_cmd_by_name(cmd_name,*args_list)
         if rsp_dict:
-            ret_value = self._processRspDict(rsp_dict)
+            ret_value = self._process_rsp_dict(rsp_dict)
             return ret_value
 
-    def _createCmds(self):
+    def _create_cmds(self):
         self.cmd_func_dict = {}
         for cmd_id, cmd_name in sorted(self.cmd_dict_inv.items()):
-            cmd_func = functools.partial(self._cmdFuncBase, cmd_name)
+            cmd_func = functools.partial(self._cmd_func_base, cmd_name)
             setattr(self,cmd_name,cmd_func)
             self.cmd_func_dict[cmd_name] = cmd_func
 
-    def _processRspDict(self,rsp_dict):
+    def _process_rsp_dict(self,rsp_dict):
         if len(rsp_dict) == 1:
             ret_value = rsp_dict.values()[0]
         else:
@@ -216,7 +214,7 @@ class ArduinoDevice(SerialDevice):
                 ret_value = rsp_dict
         return ret_value
 
-    def _argsDictToList(self,args_dict):
+    def _args_dict_to_list(self,args_dict):
         key_set = set(args_dict.keys())
         order_list = sorted([(num,name) for (name,num) in order_dict.iteritems()])
         args_list = [args_dict[name] for (num, name) in order_list]
@@ -232,28 +230,28 @@ class ArduinoDevices(SerialDevices):
 
     def __init__(self,*args,**kwargs):
         if ('use_ports' not in kwargs) or (kwargs['use_ports'] is None):
-            kwargs['use_ports'] = findArduinoDevicePorts(*args,**kwargs)
+            kwargs['use_ports'] = find_arduino_device_ports(*args,**kwargs)
             sort = True
         else:
             sort = False
         super(ArduinoDevices,self).__init__(*args,**kwargs)
         if sort:
-            self.sortByModelNumber()
+            self.sort_by_model_number()
 
-    def appendDevice(self,*args,**kwargs):
+    def append_device(self,*args,**kwargs):
         self.append(ArduinoDevice(*args,**kwargs))
 
-    def getArduinoDevicesInfo(self):
+    def get_arduino_devices_info(self):
         arduino_devices_info = []
         for dev in self:
-            arduino_devices_info.append(dev.getArduinoDeviceInfo())
+            arduino_devices_info.append(dev.get_arduino_device_info())
         return arduino_devices_info
 
-    def sortByModelNumber(self,*args,**kwargs):
+    def sort_by_model_number(self,*args,**kwargs):
         kwargs['key'] = operator.attrgetter('model_number','serial_number','device_name','port')
         self.sort(**kwargs)
 
-    def getByModelNumber(self,model_number):
+    def get_by_model_number(self,model_number):
         dev_list = []
         for device_index in range(len(self)):
             dev = self[device_index]
@@ -264,10 +262,10 @@ class ArduinoDevices(SerialDevices):
         elif 1 < len(dev_list):
             return dev_list
 
-    def sortBySerialNumber(self,*args,**kwargs):
-        self.sortByModelNumber(*args,**kwargs)
+    def sort_by_serial_number(self,*args,**kwargs):
+        self.sort_by_model_number(*args,**kwargs)
 
-    def getBySerialNumber(self,serial_number):
+    def get_by_serial_number(self,serial_number):
         dev_list = []
         for device_index in range(len(self)):
             dev = self[device_index]
@@ -279,17 +277,17 @@ class ArduinoDevices(SerialDevices):
             return dev_list
 
 
-def checkDictForKey(d,k,dname=''):
+def check_dict_for_key(d,k,dname=''):
     if not k in d:
         if not dname:
             dname = 'dictionary'
         raise IOError, '{0} does not contain {1}'.format(dname,k)
 
-def jsonStrToDict(json_str):
-    json_dict =  json.loads(json_str,object_hook=jsonDecodeDict)
+def json_str_to_dict(json_str):
+    json_dict =  json.loads(json_str,object_hook=json_decode_dict)
     return json_dict
 
-def jsonDecodeDict(data):
+def json_decode_dict(data):
     """
     Object hook for decoding dictionaries from serialized json data. Ensures that
     all strings are unpacked as str objects rather than unicode.
@@ -301,13 +299,13 @@ def jsonDecodeDict(data):
         if isinstance(value, unicode):
             value = value.encode('utf-8')
         elif isinstance(value, list):
-            value = jsonDecodeList(value)
+            value = json_decode_list(value)
         elif isinstance(value, dict):
-            value = jsonDecodeDict(value)
+            value = json_decode_dict(value)
         rv[key] = value
     return rv
 
-def jsonDecodeList(data):
+def json_decode_list(data):
     """
     Object hook for decoding lists from serialized json data. Ensures that
     all strings are unpacked as str objects rather than unicode.
@@ -317,14 +315,17 @@ def jsonDecodeList(data):
         if isinstance(item, unicode):
             item = item.encode('utf-8')
         elif isinstance(item, list):
-            item = jsonDecodeList(item)
+            item = json_decode_list(item)
         elif isinstance(item, dict):
-            item = jsonDecodeDict(item)
+            item = json_decode_dict(item)
         rv.append(item)
     return rv
 
-def findArduinoDevicePorts(baudrate=None, model_number=None, serial_number=None, try_ports=None, debug=DEBUG):
-    serial_device_ports = findSerialDevicePorts(try_ports=try_ports, debug=debug)
+def find_arduino_device_ports(baudrate=None, model_number=None, serial_number=None, try_ports=None, debug=DEBUG):
+    serial_device_ports = find_serial_device_ports(try_ports=try_ports, debug=debug)
+    os_type = platform.system()
+    if os_type == 'Darwin':
+        serial_device_ports = [x for x in serial_device_ports if 'tty.usbmodem' in x or 'tty.usbserial' in x]
 
     if type(model_number) is int:
         model_number = [model_number]
@@ -358,16 +359,16 @@ def findArduinoDevicePorts(baudrate=None, model_number=None, serial_number=None,
             pass
     return arduino_device_ports
 
-def findArduinoDevicePort(baudrate=None, model_number=None, serial_number=None, try_ports=None, debug=DEBUG):
-    arduino_device_ports = findArduinoDevicePorts(baudrate=baudrate,
-                                                  model_number=model_number,
-                                                  serial_number=serial_number,
-                                                  try_ports=try_ports,
-                                                  debug=debug)
+def find_arduino_device_port(baudrate=None, model_number=None, serial_number=None, try_ports=None, debug=DEBUG):
+    arduino_device_ports = find_arduino_device_ports(baudrate=baudrate,
+                                                     model_number=model_number,
+                                                     serial_number=serial_number,
+                                                     try_ports=try_ports,
+                                                     debug=debug)
     if len(arduino_device_ports) == 1:
         return arduino_device_ports.keys()[0]
     elif len(arduino_device_ports) == 0:
-        serial_device_ports = findSerialDevicePorts(try_ports)
+        serial_device_ports = find_serial_device_ports(try_ports)
         err_str = 'Could not find any Arduino devices. Check connections and permissions.\n'
         err_str += 'Tried ports: ' + str(serial_device_ports)
         raise RuntimeError(err_str)

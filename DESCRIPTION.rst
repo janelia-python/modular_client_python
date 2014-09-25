@@ -1,13 +1,20 @@
-A sample Python project
-=======================
+python_arduino_device
+=====================
 
-This is the description file for the project.
+This Python package creates a class named ArduinoDevice, which inherits
+from SerialDevice and adds methods to it, like auto discovery of
+available Arduinos in Linux, Windows, and Mac OS X.
 
-The file should use UTF-8 encoding and be written using ReStructured Text. It
-will be used to generate the project webpage on PyPI, and should be written for
-that purpose.
+Authors:
+Peter Polidoro <polidorop@janelia.hhmi.org>
 
-Typical contents for this file would include an overview of the project, basic
-usage examples, etc. Generally, including the project changelog in here is not
-a good idea, although a simple "What's New" section for the most recent version
-may be appropriate.
+License:
+BSD
+
+Example Usage::
+
+    from arduino_device import ArduinoDevice
+    dev = ArduinoDevice()
+    dev.get_arduino_device_info()
+    dev.get_arduino_commands()
+
