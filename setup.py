@@ -67,11 +67,12 @@ setup(
     # project is installed. For an analysis of "install_requires" vs pip's
     # requirements files see:
     # https://packaging.python.org/en/latest/technical.html#install-requires-vs-requirements-files
-    install_requires=['serial_device'
+    install_requires=['pyserial',
+                      'serial_device==2.1.0'
     ],
 
     dependency_links = [
-        'https://github.com/JaneliaSciComp/python_serial_device/tarball/master#egg=serial_device'
+        'https://github.com/JaneliaSciComp/python_serial_device/tarball/master#egg=serial_device-2.1.0'
     ],
 
     # If there are data files included in your packages that need to be
