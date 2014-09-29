@@ -1,6 +1,7 @@
 from setuptools import setup, find_packages  # Always prefer setuptools over distutils
 from codecs import open  # To use a consistent encoding
 from os import path
+from version import get_git_version
 
 here = path.abspath(path.dirname(__file__))
 
@@ -14,9 +15,9 @@ setup(
     # Versions should comply with PEP440.  For a discussion on single-sourcing
     # the version across setup.py and the project code, see
     # http://packaging.python.org/en/latest/tutorial.html#version
-    version='1.0.0',
+    version=get_git_version(),
 
-    description='Python Arduino Device',
+    description='Interface to arduino devices with auto creation of class methods with arduino commands and auto discovery of available Arduinos in Linux, Windows, and Mac OS X',
     long_description=long_description,
 
     # The project's main homepage.
@@ -46,13 +47,13 @@ setup(
 
         # Specify the Python versions you support here. In particular, ensure
         # that you indicate whether you support Python 2, Python 3 or both.
-        'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.6',
+        # 'Programming Language :: Python :: 2',
+        # 'Programming Language :: Python :: 2.6',
         'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.2',
-        'Programming Language :: Python :: 3.3',
-        'Programming Language :: Python :: 3.4',
+        # 'Programming Language :: Python :: 3',
+        # 'Programming Language :: Python :: 3.2',
+        # 'Programming Language :: Python :: 3.3',
+        # 'Programming Language :: Python :: 3.4',
     ],
 
     # What does your project relate to?
@@ -60,19 +61,15 @@ setup(
 
     # You can just specify the packages manually here if your project is
     # simple. Or you can use find_packages().
-    # packages=find_packages(exclude=['contrib', 'docs', 'tests*']),
-    packages=['arduino_device'],
+    packages=find_packages(exclude=['contrib', 'docs', 'tests*']),
 
     # List run-time dependencies here.  These will be installed by pip when your
     # project is installed. For an analysis of "install_requires" vs pip's
     # requirements files see:
     # https://packaging.python.org/en/latest/technical.html#install-requires-vs-requirements-files
     install_requires=['pyserial',
-                      'serial_device>=2.0'
-    ],
-
-    dependency_links = [
-        'https://github.com/JaneliaSciComp/python_serial_device/tarball/master#egg=serial_device-2.1.0'
+                      'serial_device2',
+                      'inflection',
     ],
 
     # If there are data files included in your packages that need to be

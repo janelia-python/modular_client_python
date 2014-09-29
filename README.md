@@ -1,24 +1,35 @@
 python_arduino_device
 =====================
 
-This Python package creates a class named ArduinoDevice, which inherits
-from SerialDevice and adds methods to it, like auto discovery of
-available Arduinos in Linux, Windows, and Mac OS X.
+This Python package (arduino\_device) creates a class named
+ArduinoDevice, which contains an instance of
+serial\_device2.SerialDevice and adds methods to it, like auto
+discovery of available Arduinos in Linux, Windows, and Mac OS X. This
+class automatically creates methods from available functions reported
+by the Arduino.
 
 Authors:
-Peter Polidoro <polidorop@janelia.hhmi.org>
+
+    Peter Polidoro <polidorop@janelia.hhmi.org>
 
 License:
-BSD
+
+    BSD
 
 ##Example Usage
 
 
 ```python
 from arduino_device import ArduinoDevice
-dev = ArduinoDevice()
-dev.get_arduino_device_info()
-dev.get_arduino_commands()
+dev = ArduinoDevice() # Automatically finds device if one available
+dev = ArduinoDevice('/dev/ttyACM0') # Linux
+dev = ArduinoDevice('/dev/tty.usbmodem262471') # Mac OS X
+dev = ArduinoDevice('COM3') # Windows
+dev.get_commands()
+devs = ArduinoDevices()  # Automatically finds all available devices
+devs.get_devices_info()
+devs.sort_by_port()
+dev = devs[0]
 ```
 
 ##Installation
@@ -29,7 +40,7 @@ dev.get_arduino_commands()
 mkdir -p ~/virtualenvs/arduino_device
 virtualenv ~/virtualenvs/arduino_device
 source ~/virtualenvs/arduino_device/bin/activate
-pip install https://github.com/JaneliaSciComp/python_arduino_device/tarball/master
+pip install arduino_device
 ```
 
 ###Windows

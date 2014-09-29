@@ -1,4 +1,8 @@
 include DESCRIPTION.rst
+include README.md
+include RELEASE-VERSION
+include version.py
+include setup.py
 
 # Include the test suite (FIXME: does not work yet)
 # recursive-include tests *

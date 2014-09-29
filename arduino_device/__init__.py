@@ -1,5 +1,9 @@
-from arduino_device import ArduinoDevice, ArduinoDevices, find_arduino_device_ports, find_arduino_device_port
+'''
+This Python package (arduino_device) creates a class named
+ArduinoDevice, which contains an instance of serial_device2.SerialDevice
+and adds methods to it, like auto discovery of available Arduinos in
+Linux, Windows, and Mac OS X. This class automatically creates methods
+from available functions reported by the Arduino.
+'''
 
-# def main():
-#     """Entry point for the application script"""
-#     print("Call your main application code here")
+from arduino_device import ArduinoDevice, ArduinoDevices, find_arduino_device_ports, find_arduino_device_port, __version__
