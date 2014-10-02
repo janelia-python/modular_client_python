@@ -6,8 +6,7 @@ ArduinoDevice, which contains an instance of
 serial\_device2.SerialDevice and adds methods to it, like auto
 discovery of available Arduinos in Linux, Windows, and Mac OS X. This
 class automatically creates methods from available functions reported
-by the Arduino when using the DeviceInterface Arduino library located
-in the repository https://github.com/JaneliaSciComp/arduino-libraries
+by the Arduino when it is running the appropriate firmware.
 
 Authors:
 
@@ -75,5 +74,5 @@ pip install virtualenv
 mkdir C:\virtualenvs
 virtualenv C:\virtualenvs\arduino_device
 C:\virtualenvs\arduino_device\Scripts\activate
-pip install https://github.com/JaneliaSciComp/python_arduino_device/zipball/master
+pip install arduino_device
 ```
