@@ -27,6 +27,5 @@ Example Usage::
     dev.get_commands()
     devs = ArduinoDevices()  # Automatically finds all available devices
     devs.get_devices_info()
-    devs.sort_by_port()
     dev = devs[0]
 

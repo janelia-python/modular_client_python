@@ -160,19 +160,15 @@ class ArduinoDevice(object):
         return rsp_dict
 
     def _get_device_info(self):
-        device_info = self._send_cmd_get_rsp(self._CMD_GET_DEVICE_INFO)
+        self.device_info = self._send_cmd_get_rsp(self._CMD_GET_DEVICE_INFO)
         try:
-            self.model_number = device_info['model_number']
+            self.model_number = self.device_info['model_number']
         except KeyError:
             self.model_number = None
         try:
-            self.serial_number = device_info['serial_number']
+            self.serial_number = self.device_info['serial_number']
         except KeyError:
             self.serial_number = None
-        try:
-            self.firmware_number = device_info['firmware_number']
-        except KeyError:
-            self.firmware_number = None
 
     def _get_cmd_dict(self):
         cmd_dict = self._send_cmd_get_rsp(self._CMD_GET_COMMANDS)
@@ -253,13 +249,7 @@ class ArduinoDevice(object):
         return [inflection.underscore(key) for key in self._cmd_dict.keys()]
 
 
-# device_names example:
-# [{'port':'/dev/ttyACM0',
-#   'device_name':'arduino0'},
-#  {'model_number':232,
-#   'serial_number':3,
-#   'device_name':'arduino1'}]
-class ArduinoDevices(SerialDevices):
+class ArduinoDevices(list):
     '''
     ArduinoDevices inherits from list and automatically populates it
     with ArduinoDevices on all available serial ports.
@@ -268,18 +258,19 @@ class ArduinoDevices(SerialDevices):
 
     devs = ArduinoDevices()  # Automatically finds all available devices
     devs.get_devices_info()
-    devs.sort_by_port()
     dev = devs[0]
     '''
     def __init__(self,*args,**kwargs):
         if ('use_ports' not in kwargs) or (kwargs['use_ports'] is None):
-            kwargs['use_ports'] = find_arduino_device_ports(*args,**kwargs)
-            sort = True
+            arduino_device_ports = find_arduino_device_ports(*args,**kwargs)
         else:
-            sort = False
-        super(ArduinoDevices,self).__init__(*args,**kwargs)
-        if sort:
-            self.sort_by_model_number()
+            arduino_device_ports = use_ports
+
+        for port in arduino_device_ports:
+            kwargs.update({'port': port})
+            self.append_device(*args,**kwargs)
+
+        self.sort_by_model_number()
 
     def append_device(self,*args,**kwargs):
         self.append(ArduinoDevice(*args,**kwargs))
@@ -287,11 +278,10 @@ class ArduinoDevices(SerialDevices):
     def get_devices_info(self):
         arduino_devices_info = []
         for dev in self:
-            arduino_devices_info.append(dev.get_device_info())
+            arduino_devices_info.append(dev.device_info)
         return arduino_devices_info
 
     def sort_by_model_number(self,*args,**kwargs):
-        self.sort_by_device_name()
         kwargs['key'] = operator.attrgetter('model_number','serial_number')
         self.sort(**kwargs)
 
