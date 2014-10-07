@@ -49,8 +49,8 @@ class ArduinoDevice(object):
     _WRITE_WRITE_DELAY = 0.05
     _RESET_DELAY = 2.0
     _CMD_GET_DEVICE_INFO = 0
-    _CMD_GET_CMDS = 1
-    _CMD_GET_RSP_CODES = 2
+    _CMD_GET_COMMANDS = 1
+    _CMD_GET_RESPONSE_CODES = 2
 
     def __init__(self,*args,**kwargs):
         model_number = None
@@ -93,10 +93,7 @@ class ArduinoDevice(object):
         self._cmd_dict = self._get_cmd_dict()
         self._cmd_dict_inv = dict([(v,k) for (k,v) in self._cmd_dict.iteritems()])
         self._create_cmds()
-        dev_info = self.get_dev_info()
-        self.model_number = dev_info['model_number']
-        self.serial_number = dev_info['serial_number']
-        self.firmware_number = dev_info['firmware_number']
+        self._get_device_info()
         t_end = time.time()
         self._debug_print('Initialization time =', (t_end - t_start))
 
@@ -110,6 +107,7 @@ class ArduinoDevice(object):
     def _args_to_cmd_str(self,*args):
         cmd_list = ['[', ','.join(map(str,args)), ']']
         cmd_str = ''.join(cmd_list)
+        cmd_str = cmd_str + '\n';
         return cmd_str
 
     def _send_cmd(self,*args):
@@ -161,8 +159,27 @@ class ArduinoDevice(object):
                 raise IOError, err_msg
         return rsp_dict
 
+    def _get_device_info(self):
+        device_info = self._send_cmd_get_rsp(self._CMD_GET_DEVICE_INFO)
+        try:
+            self.model_number = device_info['model_number']
+        except KeyError:
+            self.model_number = None
+        try:
+            self.serial_number = device_info['serial_number']
+        except KeyError:
+            self.serial_number = None
+        try:
+            self.firmware_number = device_info['firmware_number']
+        except KeyError:
+            self.firmware_number = None
+
+    def _get_cmd_dict(self):
+        cmd_dict = self._send_cmd_get_rsp(self._CMD_GET_COMMANDS)
+        return cmd_dict
+
     def _get_rsp_dict(self):
-        rsp_dict = self._send_cmd_get_rsp(self._CMD_GET_RSP_CODES)
+        rsp_dict = self._send_cmd_get_rsp(self._CMD_GET_RESPONSE_CODES)
         check_dict_for_key(rsp_dict,'rsp_success',dname='rsp_dict')
         check_dict_for_key(rsp_dict,'rsp_error',dname='rsp_dict')
         return rsp_dict
@@ -223,10 +240,6 @@ class ArduinoDevice(object):
         args_list = [args_dict[name] for (num, name) in order_list]
         return args_list
 
-    def _get_cmd_dict(self):
-        cmd_dict = self._send_cmd_get_rsp(self._CMD_GET_CMDS)
-        return cmd_dict
-
     def close(self):
         '''
         Close the device serial port.
@@ -274,7 +287,7 @@ class ArduinoDevices(SerialDevices):
     def get_devices_info(self):
         arduino_devices_info = []
         for dev in self:
-            arduino_devices_info.append(dev.get_dev_info())
+            arduino_devices_info.append(dev.get_device_info())
         return arduino_devices_info
 
     def sort_by_model_number(self,*args,**kwargs):
@@ -366,25 +379,11 @@ def find_arduino_device_ports(baudrate=None, model_number=None, serial_number=No
     arduino_device_ports = {}
     for port in serial_device_ports:
         try:
-            dev = ArduinoDevice(port=port,baudrate=baudrate)
-            try:
-                dev_info = dev.get_dev_info()
-                if DEBUG:
-                    print("dev_info = " + str(dev_info))
-            except Exception:
-                break
-            try:
-                dev_model_number = dev_info['model_number']
-            except KeyError:
-                break
-            if (model_number is None ) or (dev_model_number in model_number):
-                try:
-                    dev_serial_number = dev_info['serial_number']
-                except KeyError:
-                    break
-                if (serial_number is None) or (dev_serial_number in serial_number):
-                    arduino_device_ports[port] = {'model_number': dev_model_number,
-                                                  'serial_number': dev_serial_number}
+            dev = ArduinoDevice(port=port,baudrate=baudrate,debug=debug)
+            if ((model_number is None ) and (dev.model_number is not None)) or (dev.model_number in model_number):
+                if ((serial_number is None) and (dev.serial_number is not None)) or (dev.serial_number in serial_number):
+                    arduino_device_ports[port] = {'model_number': dev.model_number,
+                                                  'serial_number': dev.serial_number}
             dev.close()
         except (serial.SerialException, IOError):
             pass
