@@ -1,12 +1,13 @@
-python_arduino_device
+python_remote_device
 =====================
 
-This Python package (arduino\_device) creates a class named
-ArduinoDevice, which contains an instance of
+This Python package (remote\_device) creates a class named
+RemoteDevice, which contains an instance of
 serial\_device2.SerialDevice and adds methods to it, like auto
-discovery of available Arduinos in Linux, Windows, and Mac OS X. This
-class automatically creates methods from available functions reported
-by the Arduino when it is running the appropriate firmware.
+discovery of available remote devices in Linux, Windows, and Mac OS
+X. This class automatically creates methods from available functions
+reported by the remote device when it is running the appropriate
+firmware.
 
 Authors:
 
@@ -20,13 +21,13 @@ License:
 
 
 ```python
-from arduino_device import ArduinoDevice
-dev = ArduinoDevice() # Automatically finds device if one available
-dev = ArduinoDevice('/dev/ttyACM0') # Linux
-dev = ArduinoDevice('/dev/tty.usbmodem262471') # Mac OS X
-dev = ArduinoDevice('COM3') # Windows
-dev.get_commands()
-devs = ArduinoDevices()  # Automatically finds all available devices
+from remote_device import RemoteDevice
+dev = RemoteDevice() # Automatically finds device if one available
+dev = RemoteDevice('/dev/ttyACM0') # Linux
+dev = RemoteDevice('/dev/tty.usbmodem262471') # Mac OS X
+dev = RemoteDevice('COM3') # Windows
+dev.get_methods()
+devs = RemoteDevices()  # Automatically finds all available devices
 devs.get_devices_info()
 dev = devs[0]
 ```
@@ -40,10 +41,10 @@ dev = devs[0]
 [Setup Python for Mac OS X](./PYTHON_SETUP_MAC_OS_X.md)
 
 ```shell
-mkdir -p ~/virtualenvs/arduino_device
-virtualenv ~/virtualenvs/arduino_device
-source ~/virtualenvs/arduino_device/bin/activate
-pip install arduino_device
+mkdir -p ~/virtualenvs/remote_device
+virtualenv ~/virtualenvs/remote_device
+source ~/virtualenvs/remote_device/bin/activate
+pip install remote_device
 ```
 
 ###Windows
@@ -51,7 +52,7 @@ pip install arduino_device
 [Setup Python for Windows](./PYTHON_SETUP_WINDOWS.md)
 
 ```shell
-virtualenv C:\virtualenvs\arduino_device
-C:\virtualenvs\arduino_device\Scripts\activate
-pip install arduino_device
+virtualenv C:\virtualenvs\remote_device
+C:\virtualenvs\remote_device\Scripts\activate
+pip install remote_device
 ```

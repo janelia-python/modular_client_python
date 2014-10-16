@@ -1,12 +1,12 @@
-python_arduino_device
+python_remote_device
 =====================
 
-This Python package creates a class named ArduinoDevice, which
-contains an instance of serial_device2.SerialDevice and adds methods
-to it, like auto discovery of available Arduinos in Linux, Windows,
-and Mac OS X. This class automatically creates methods from available
-functions reported by the Arduino when it is running the appropriate
-firmware.
+This Python package creates a class named RemoteDevice, which contains
+an instance of serial_device2.SerialDevice and adds methods to it,
+like auto discovery of available remote devices in Linux, Windows, and
+Mac OS X. This class automatically creates methods from available
+functions reported by the remote device when it is running the
+appropriate firmware.
 
 Authors::
 
@@ -18,14 +18,14 @@ License::
 
 Example Usage::
 
-    from arduino_device import ArduinoDevice
-    dev = ArduinoDevice()
-    dev = ArduinoDevice() # Automatically finds device if one available
-    dev = ArduinoDevice('/dev/ttyACM0') # Linux
-    dev = ArduinoDevice('/dev/tty.usbmodem262471') # Mac OS X
-    dev = ArduinoDevice('COM3') # Windows
-    dev.get_commands()
-    devs = ArduinoDevices()  # Automatically finds all available devices
+    from remote_device import RemoteDevice
+    dev = RemoteDevice()
+    dev = RemoteDevice() # Automatically finds device if one available
+    dev = RemoteDevice('/dev/ttyACM0') # Linux
+    dev = RemoteDevice('/dev/tty.usbmodem262471') # Mac OS X
+    dev = RemoteDevice('COM3') # Windows
+    dev.get_methods()
+    devs = RemoteDevices()  # Automatically finds all available devices
     devs.get_devices_info()
     dev = devs[0]
 
