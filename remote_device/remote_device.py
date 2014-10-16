@@ -48,9 +48,9 @@ class RemoteDevice(object):
     _TIMEOUT = 0.05
     _WRITE_WRITE_DELAY = 0.05
     _RESET_DELAY = 2.0
-    _GET_DEVICE_INFO_METHOD_ID = 0
-    _GET_METHOD_IDS_METHOD_ID = 1
-    _GET_RESPONSE_CODES_METHOD_ID = 2
+    _METHOD_ID_GET_DEVICE_INFO = 0
+    _METHOD_ID_GET_METHOD_IDS = 1
+    _METHOD_ID_GET_RESPONSE_CODES = 2
 
     def __init__(self,*args,**kwargs):
         model_number = None
@@ -135,32 +135,32 @@ class RemoteDevice(object):
         try:
             response_dict = json_string_to_dict(response)
         except Exception, e:
-            err_msg = 'Unable to parse device response {0}.'.format(str(e))
-            raise IOError, err_msg
+            error_message = 'Unable to parse device response {0}.'.format(str(e))
+            raise IOError, error_message
         try:
             status = response_dict.pop('status')
         except KeyError:
-            err_msg = 'Device response does not contain status.'
-            raise IOError, err_msg
+            error_message = 'Device response does not contain status.'
+            raise IOError, error_message
         try:
-            response_id  = response_dict.pop('cmd_id')
+            method_id  = response_dict.pop('method_id')
         except KeyError:
-            err_msg = 'Device response does not contain id.'
-            raise IOError, err_msg
-        if not response_id == args[0]:
-            raise IOError, 'Device response id does not match that sent.'
+            error_message = 'Device response does not contain method_id.'
+            raise IOError, error_message
+        if not method_id == args[0]:
+            raise IOError, 'Device method_id does not match that sent.'
         if self._response_dict is not None:
-            if status == self._response_dict['rsp_error']:
+            if status == self._response_dict['response_error']:
                 try:
-                    dev_err_msg = '(from device) {0}'.format(response_dict['err_msg'])
+                    dev_error_message = '(from device) {0}'.format(response_dict['error_message'])
                 except KeyError:
-                    dev_err_msg = "Error message missing."
-                err_msg = '{0}'.format(dev_err_msg)
-                raise IOError, err_msg
+                    dev_error_message = "Error message missing."
+                error_message = '{0}'.format(dev_error_message)
+                raise IOError, error_message
         return response_dict
 
     def _get_device_info(self):
-        self.device_info = self._send_request_get_response(self._GET_DEVICE_INFO_METHOD_ID)
+        self.device_info = self._send_request_get_response(self._METHOD_ID_GET_DEVICE_INFO)
         try:
             self.model_number = self.device_info['model_number']
         except KeyError:
@@ -171,13 +171,13 @@ class RemoteDevice(object):
             self.serial_number = None
 
     def _get_method_dict(self):
-        method_dict = self._send_request_get_response(self._GET_METHOD_IDS_METHOD_ID)
+        method_dict = self._send_request_get_response(self._METHOD_ID_GET_METHOD_IDS)
         return method_dict
 
     def _get_response_dict(self):
-        response_dict = self._send_request_get_response(self._GET_RESPONSE_CODES_METHOD_ID)
-        check_dict_for_key(response_dict,'rsp_success',dname='response_dict')
-        check_dict_for_key(response_dict,'rsp_error',dname='response_dict')
+        response_dict = self._send_request_get_response(self._METHOD_ID_GET_RESPONSE_CODES)
+        check_dict_for_key(response_dict,'response_success',dname='response_dict')
+        check_dict_for_key(response_dict,'response_error',dname='response_dict')
         return response_dict
 
     def _send_request_by_method_name(self,name,*args):
