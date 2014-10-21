@@ -32,6 +32,10 @@ devs.get_devices_info()
 dev = devs[0]
 ```
 
+More Detailed Examples:
+
+<https://github.com/JaneliaSciComp/arduino_remote_device>
+
 ##Installation
 
 ###Linux and Mac OS X
