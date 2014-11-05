@@ -21,11 +21,12 @@ Example Usage::
     from remote_device import RemoteDevice
     dev = RemoteDevice()
     dev = RemoteDevice() # Automatically finds device if one available
-    dev = RemoteDevice('/dev/ttyACM0') # Linux
-    dev = RemoteDevice('/dev/tty.usbmodem262471') # Mac OS X
-    dev = RemoteDevice('COM3') # Windows
+    dev = RemoteDevice('/dev/ttyACM0') # Linux specific port
+    dev = RemoteDevice('/dev/tty.usbmodem262471') # Mac OS X specific port
+    dev = RemoteDevice('COM3') # Windows specific port
+    dev.get_device_info()
     dev.get_methods()
     devs = RemoteDevices()  # Automatically finds all available devices
-    devs.get_devices_info()
-    dev = devs[0]
+    devs.items()
+    dev = devs[name][serial_number]
 

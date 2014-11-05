@@ -43,6 +43,7 @@ class RemoteDevice(object):
     dev = RemoteDevice('/dev/ttyACM0') # Linux
     dev = RemoteDevice('/dev/tty.usbmodem262471') # Mac OS X
     dev = RemoteDevice('COM3') # Windows
+    dev.get_device_info()
     dev.get_methods()
     '''
     _TIMEOUT = 0.05
@@ -93,7 +94,6 @@ class RemoteDevice(object):
         self._method_dict = self._get_method_dict()
         self._method_dict_inv = dict([(v,k) for (k,v) in self._method_dict.iteritems()])
         self._create_methods()
-        self._get_device_info()
         t_end = time.time()
         self._debug_print('Initialization time =', (t_end - t_start))
 
@@ -159,17 +159,6 @@ class RemoteDevice(object):
                 raise IOError, error_message
         return response_dict
 
-    def _get_device_info(self):
-        self.device_info = self._send_request_get_response(self._METHOD_ID_GET_DEVICE_INFO)
-        try:
-            self.model_number = self.device_info['model_number']
-        except KeyError:
-            self.model_number = None
-        try:
-            self.serial_number = self.device_info['serial_number']
-        except KeyError:
-            self.serial_number = None
-
     def _get_method_dict(self):
         method_dict = self._send_request_get_response(self._METHOD_ID_GET_METHOD_IDS)
         return method_dict
@@ -232,6 +221,12 @@ class RemoteDevice(object):
         '''
         self._serial_device.close()
 
+    def get_port(self):
+        return self._serial_device.port
+
+    def get_device_info(self):
+        return self._send_request_get_response(self._METHOD_ID_GET_DEVICE_INFO)
+
     def get_methods(self):
         '''
         Get a list of remote methods automatically attached as class methods.
@@ -239,16 +234,21 @@ class RemoteDevice(object):
         return [inflection.underscore(key) for key in self._method_dict.keys()]
 
 
-class RemoteDevices(list):
+class RemoteDevices(dict):
     '''
-    RemoteDevices inherits from list and automatically populates it
-    with RemoteDevices on all available serial ports.
+    RemoteDevices inherits from dict and automatically populates it with
+    RemoteDevices on all available serial ports. Access each individual
+    device with two keys, the device name and the serial_number. If you
+    want to connect multiple RemoteDevices with the same name at the
+    same time, first make sure they have unique serial_numbers by
+    connecting each device one by one and using the set_serial_number
+    method on each device.
 
     Example Usage:
 
     devs = RemoteDevices()  # Automatically finds all available devices
-    devs.get_devices_info()
-    dev = devs[0]
+    devs.items()
+    dev = devs[name][serial_number]
     '''
     def __init__(self,*args,**kwargs):
         if ('use_ports' not in kwargs) or (kwargs['use_ports'] is None):
@@ -258,47 +258,16 @@ class RemoteDevices(list):
 
         for port in remote_device_ports:
             kwargs.update({'port': port})
-            self.append_device(*args,**kwargs)
+            self._add_device(*args,**kwargs)
 
-        self.sort_by_model_number()
-
-    def append_device(self,*args,**kwargs):
-        self.append(RemoteDevice(*args,**kwargs))
-
-    def get_devices_info(self):
-        remote_devices_info = []
-        for dev in self:
-            remote_devices_info.append(dev.device_info)
-        return remote_devices_info
-
-    def sort_by_model_number(self,*args,**kwargs):
-        kwargs['key'] = operator.attrgetter('model_number','serial_number')
-        self.sort(**kwargs)
-
-    def get_by_model_number(self,model_number):
-        dev_list = []
-        for device_index in range(len(self)):
-            dev = self[device_index]
-            if dev.model_number == model_number:
-                dev_list.append(dev)
-        if len(dev_list) == 1:
-            return dev_list[0]
-        elif 1 < len(dev_list):
-            return dev_list
-
-    def sort_by_serial_number(self,*args,**kwargs):
-        self.sort_by_model_number(*args,**kwargs)
-
-    def get_by_serial_number(self,serial_number):
-        dev_list = []
-        for device_index in range(len(self)):
-            dev = self[device_index]
-            if dev.serial_number == serial_number:
-                dev_list.append(dev)
-        if len(dev_list) == 1:
-            return dev_list[0]
-        elif 1 < len(dev_list):
-            return dev_list
+    def _add_device(self,*args,**kwargs):
+        dev = RemoteDevice(*args,**kwargs)
+        device_info = dev.get_device_info()
+        name = device_info['name']
+        serial_number = device_info['serial_number']
+        if name not in self:
+            self[name] = {}
+        self[name][serial_number] = dev
 
 
 def check_dict_for_key(d,k,dname=''):
@@ -360,10 +329,11 @@ def find_remote_device_ports(baudrate=None, model_number=None, serial_number=Non
     for port in serial_device_ports:
         try:
             dev = RemoteDevice(port=port,baudrate=baudrate,debug=debug)
-            if ((model_number is None ) and (dev.model_number is not None)) or (dev.model_number in model_number):
-                if ((serial_number is None) and (dev.serial_number is not None)) or (dev.serial_number in serial_number):
-                    remote_device_ports[port] = {'model_number': dev.model_number,
-                                                  'serial_number': dev.serial_number}
+            device_info = dev.get_device_info()
+            if ((model_number is None ) and (device_info['model_number'] is not None)) or (device_info['model_number'] in model_number):
+                if ((serial_number is None) and (device_info['serial_number'] is not None)) or (device_info['serial_number'] in serial_number):
+                    remote_device_ports[port] = {'model_number': device_info['model_number'],
+                                                  'serial_number': device_info['serial_number']}
             dev.close()
         except (serial.SerialException, IOError):
             pass
