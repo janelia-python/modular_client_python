@@ -13,11 +13,11 @@ from serial_device2 import SerialDevice, SerialDevices, find_serial_device_ports
 
 try:
     from pkg_resources import get_distribution, DistributionNotFound
-    _dist = get_distribution('remote_device')
+    _dist = get_distribution('modular_device')
     # Normalize case for Windows systems
     dist_loc = os.path.normcase(_dist.location)
     here = os.path.normcase(__file__)
-    if not here.startswith(os.path.join(dist_loc, 'remote_device')):
+    if not here.startswith(os.path.join(dist_loc, 'modular_device')):
         # not installed, but there is another version that *is*
         raise DistributionNotFound
 except (ImportError,DistributionNotFound):
@@ -29,20 +29,20 @@ else:
 DEBUG = False
 BAUDRATE = 9600
 
-class RemoteDevice(object):
+class ModularDevice(object):
     '''
-    RemoteDevice contains an instance of serial_device2.SerialDevice and
-    adds methods to it, like auto discovery of available remote devices
+    ModularDevice contains an instance of serial_device2.SerialDevice and
+    adds methods to it, like auto discovery of available modular devices
     in Linux, Windows, and Mac OS X. This class automatically creates
-    methods from available functions reported by the remote device when
+    methods from available functions reported by the modular device when
     it is running the appropriate firmware.
 
     Example Usage:
 
-    dev = RemoteDevice() # Automatically finds device if one available
-    dev = RemoteDevice('/dev/ttyACM0') # Linux
-    dev = RemoteDevice('/dev/tty.usbmodem262471') # Mac OS X
-    dev = RemoteDevice('COM3') # Windows
+    dev = ModularDevice() # Automatically finds device if one available
+    dev = ModularDevice('/dev/ttyACM0') # Linux
+    dev = ModularDevice('/dev/tty.usbmodem262471') # Mac OS X
+    dev = ModularDevice('COM3') # Windows
     dev.get_device_info()
     dev.get_methods()
     '''
@@ -78,16 +78,16 @@ class RemoteDevice(object):
         if 'serial_number' in kwargs:
             serial_number = kwargs.pop('serial_number')
         if ('port' not in kwargs) or (kwargs['port'] is None):
-            port =  find_remote_device_port(baudrate=kwargs['baudrate'],
-                                            model_number=model_number,
-                                            serial_number=serial_number,
-                                            try_ports=try_ports,
-                                            debug=kwargs['debug'])
+            port =  find_modular_device_port(baudrate=kwargs['baudrate'],
+                                             model_number=model_number,
+                                             serial_number=serial_number,
+                                             try_ports=try_ports,
+                                             debug=kwargs['debug'])
             kwargs.update({'port': port})
 
         t_start = time.time()
         self._serial_device = SerialDevice(*args,**kwargs)
-        atexit.register(self._exit_remote_device)
+        atexit.register(self._exit_modular_device)
         time.sleep(self._RESET_DELAY)
         self._response_dict = None
         self._response_dict = self._get_response_dict()
@@ -101,7 +101,7 @@ class RemoteDevice(object):
         if self.debug:
             print(*args)
 
-    def _exit_remote_device(self):
+    def _exit_modular_device(self):
         pass
 
     def _args_to_request(self,*args):
@@ -112,7 +112,7 @@ class RemoteDevice(object):
 
     def _send_request(self,*args):
 
-        '''Sends request to remote device over serial port and
+        '''Sends request to modular device over serial port and
         returns number of bytes written'''
 
         request = self._args_to_request(*args)
@@ -229,39 +229,39 @@ class RemoteDevice(object):
 
     def get_methods(self):
         '''
-        Get a list of remote methods automatically attached as class methods.
+        Get a list of modular methods automatically attached as class methods.
         '''
         return [inflection.underscore(key) for key in self._method_dict.keys()]
 
 
-class RemoteDevices(dict):
+class ModularDevices(dict):
     '''
-    RemoteDevices inherits from dict and automatically populates it with
-    RemoteDevices on all available serial ports. Access each individual
+    ModularDevices inherits from dict and automatically populates it with
+    ModularDevices on all available serial ports. Access each individual
     device with two keys, the device name and the serial_number. If you
-    want to connect multiple RemoteDevices with the same name at the
+    want to connect multiple ModularDevices with the same name at the
     same time, first make sure they have unique serial_numbers by
     connecting each device one by one and using the set_serial_number
     method on each device.
 
     Example Usage:
 
-    devs = RemoteDevices()  # Automatically finds all available devices
+    devs = ModularDevices()  # Automatically finds all available devices
     devs.items()
     dev = devs[name][serial_number]
     '''
     def __init__(self,*args,**kwargs):
         if ('use_ports' not in kwargs) or (kwargs['use_ports'] is None):
-            remote_device_ports = find_remote_device_ports(*args,**kwargs)
+            modular_device_ports = find_modular_device_ports(*args,**kwargs)
         else:
-            remote_device_ports = use_ports
+            modular_device_ports = use_ports
 
-        for port in remote_device_ports:
+        for port in modular_device_ports:
             kwargs.update({'port': port})
             self._add_device(*args,**kwargs)
 
     def _add_device(self,*args,**kwargs):
-        dev = RemoteDevice(*args,**kwargs)
+        dev = ModularDevice(*args,**kwargs)
         device_info = dev.get_device_info()
         name = device_info['name']
         serial_number = device_info['serial_number']
@@ -314,7 +314,7 @@ def json_decode_list(data):
         rv.append(item)
     return rv
 
-def find_remote_device_ports(baudrate=None, model_number=None, serial_number=None, try_ports=None, debug=DEBUG):
+def find_modular_device_ports(baudrate=None, model_number=None, serial_number=None, try_ports=None, debug=DEBUG):
     serial_device_ports = find_serial_device_ports(try_ports=try_ports, debug=debug)
     os_type = platform.system()
     if os_type == 'Darwin':
@@ -325,36 +325,36 @@ def find_remote_device_ports(baudrate=None, model_number=None, serial_number=Non
     if type(serial_number) is int:
         serial_number = [serial_number]
 
-    remote_device_ports = {}
+    modular_device_ports = {}
     for port in serial_device_ports:
         try:
-            dev = RemoteDevice(port=port,baudrate=baudrate,debug=debug)
+            dev = ModularDevice(port=port,baudrate=baudrate,debug=debug)
             device_info = dev.get_device_info()
             if ((model_number is None ) and (device_info['model_number'] is not None)) or (device_info['model_number'] in model_number):
                 if ((serial_number is None) and (device_info['serial_number'] is not None)) or (device_info['serial_number'] in serial_number):
-                    remote_device_ports[port] = {'model_number': device_info['model_number'],
+                    modular_device_ports[port] = {'model_number': device_info['model_number'],
                                                   'serial_number': device_info['serial_number']}
             dev.close()
         except (serial.SerialException, IOError):
             pass
-    return remote_device_ports
+    return modular_device_ports
 
-def find_remote_device_port(baudrate=None, model_number=None, serial_number=None, try_ports=None, debug=DEBUG):
-    remote_device_ports = find_remote_device_ports(baudrate=baudrate,
-                                                   model_number=model_number,
-                                                   serial_number=serial_number,
-                                                   try_ports=try_ports,
-                                                   debug=debug)
-    if len(remote_device_ports) == 1:
-        return remote_device_ports.keys()[0]
-    elif len(remote_device_ports) == 0:
+def find_modular_device_port(baudrate=None, model_number=None, serial_number=None, try_ports=None, debug=DEBUG):
+    modular_device_ports = find_modular_device_ports(baudrate=baudrate,
+                                                     model_number=model_number,
+                                                     serial_number=serial_number,
+                                                     try_ports=try_ports,
+                                                     debug=debug)
+    if len(modular_device_ports) == 1:
+        return modular_device_ports.keys()[0]
+    elif len(modular_device_ports) == 0:
         serial_device_ports = find_serial_device_ports(try_ports)
-        err_string = 'Could not find any Remote devices. Check connections and permissions.\n'
+        err_string = 'Could not find any Modular devices. Check connections and permissions.\n'
         err_string += 'Tried ports: ' + str(serial_device_ports)
         raise RuntimeError(err_string)
     else:
-        err_string = 'Found more than one Remote device. Specify port or model_number and/or serial_number.\n'
-        err_string += 'Matching ports: ' + str(remote_device_ports)
+        err_string = 'Found more than one Modular device. Specify port or model_number and/or serial_number.\n'
+        err_string += 'Matching ports: ' + str(modular_device_ports)
         raise RuntimeError(err_string)
 
 
@@ -362,4 +362,4 @@ def find_remote_device_port(baudrate=None, model_number=None, serial_number=None
 if __name__ == '__main__':
 
     debug = False
-    dev = RemoteDevice(debug=debug)
+    dev = ModularDevice(debug=debug)

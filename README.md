@@ -1,12 +1,12 @@
-python_remote_device
+modular_device_python
 =====================
 
-This Python package (remote\_device) creates a class named
-RemoteDevice, which contains an instance of
+This Python package (modular\_device) creates a class named
+ModularDevice, which contains an instance of
 serial\_device2.SerialDevice and adds methods to it, like auto
-discovery of available remote devices in Linux, Windows, and Mac OS
+discovery of available modular devices in Linux, Windows, and Mac OS
 X. This class automatically creates methods from available functions
-reported by the remote device when it is running the appropriate
+reported by the modular device when it is running the appropriate
 firmware.
 
 Authors:
@@ -21,21 +21,21 @@ License:
 
 
 ```python
-from remote_device import RemoteDevice
-dev = RemoteDevice() # Automatically finds device if one available
-dev = RemoteDevice('/dev/ttyACM0') # Linux specific port
-dev = RemoteDevice('/dev/tty.usbmodem262471') # Mac OS X specific port
-dev = RemoteDevice('COM3') # Windows specific port
+from modular_device import ModularDevice
+dev = ModularDevice() # Automatically finds device if one available
+dev = ModularDevice('/dev/ttyACM0') # Linux specific port
+dev = ModularDevice('/dev/tty.usbmodem262471') # Mac OS X specific port
+dev = ModularDevice('COM3') # Windows specific port
 dev.get_device_info()
 dev.get_methods()
-devs = RemoteDevices()  # Automatically finds all available devices
+devs = ModularDevices()  # Automatically finds all available devices
 devs.items()
 dev = devs[name][serial_number]
 ```
 
 More Detailed Examples:
 
-<https://github.com/JaneliaSciComp/arduino_remote_device>
+<https://github.com/JaneliaSciComp/modular_device_arduino>
 
 ##Installation
 
@@ -46,10 +46,10 @@ More Detailed Examples:
 [Setup Python for Mac OS X](./PYTHON_SETUP_MAC_OS_X.md)
 
 ```shell
-mkdir -p ~/virtualenvs/remote_device
-virtualenv ~/virtualenvs/remote_device
-source ~/virtualenvs/remote_device/bin/activate
-pip install remote_device
+mkdir -p ~/virtualenvs/modular_device
+virtualenv ~/virtualenvs/modular_device
+source ~/virtualenvs/modular_device/bin/activate
+pip install modular_device
 ```
 
 ###Windows
@@ -57,7 +57,7 @@ pip install remote_device
 [Setup Python for Windows](./PYTHON_SETUP_WINDOWS.md)
 
 ```shell
-virtualenv C:\virtualenvs\remote_device
-C:\virtualenvs\remote_device\Scripts\activate
-pip install remote_device
+virtualenv C:\virtualenvs\modular_device
+C:\virtualenvs\modular_device\Scripts\activate
+pip install modular_device
 ```

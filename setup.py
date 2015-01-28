@@ -10,18 +10,18 @@ with open(path.join(here, 'DESCRIPTION.rst'), encoding='utf-8') as f:
     long_description = f.read()
 
 setup(
-    name='remote_device',
+    name='modular_device',
 
     # Versions should comply with PEP440.  For a discussion on single-sourcing
     # the version across setup.py and the project code, see
     # http://packaging.python.org/en/latest/tutorial.html#version
     version=get_git_version(),
 
-    description='Interface to remote devices with auto creation of class methods and auto discovery of available remote devices in Linux, Windows, and Mac OS X',
+    description='Interface to modular devices with auto creation of class methods and auto discovery of available modular devices in Linux, Windows, and Mac OS X',
     long_description=long_description,
 
     # The project's main homepage.
-    url='https://github.com/JaneliaSciComp/python_remote_device',
+    url='https://github.com/JaneliaSciComp/modular_device_python',
 
     # Author details
     author='Peter Polidoro',
@@ -36,7 +36,7 @@ setup(
         #   3 - Alpha
         #   4 - Beta
         #   5 - Production/Stable
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 4 - Beta',
 
         # Indicate who your project is intended for
         'Intended Audience :: Developers',
@@ -57,7 +57,7 @@ setup(
     ],
 
     # What does your project relate to?
-    keywords='remote serial arduino device',
+    keywords='modular serial arduino device',
 
     # You can just specify the packages manually here if your project is
     # simple. Or you can use find_packages().
