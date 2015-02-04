@@ -39,6 +39,17 @@ More Detailed Examples:
 
 ##Installation
 
+###Install Latest Version of Arduino on your Host Machine
+
+<http://arduino.cc/en/Guide/HomePage>
+
+On linux, you may need to add yourself to the group 'dialout' in order
+to have write permissions on the USB port:
+
+```shell
+sudo usermod -aG dialout <myuser>
+```
+
 ###Linux and Mac OS X
 
 [Setup Python for Linux](./PYTHON_SETUP_LINUX.md)
