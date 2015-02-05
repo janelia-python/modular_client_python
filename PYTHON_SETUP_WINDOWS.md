@@ -1,27 +1,14 @@
 Python Setup Windows
 ====================
 
-Download Python 2.7.X Windows Installer from:
+Download latest Python 2.7.X Windows Installer from:
 
 <https://www.python.org/download>
 
-Add to path:
+Select ALL features to be installed. Specifically:
 
-    C:\Python27\
-
-Download get-pip.py from:
-
-<https://bootstrap.pypa.io/get-pip.py>
-
-Run:
-
-```shell
-python get-pip.py
-```
-
-Add to path:
-
-    C:\Python27\Scripts\
+* pip
+* Add python.exe to Path
 
 Run:
 
