@@ -48,6 +48,7 @@ to have write permissions on the USB port:
 
 ```shell
 sudo usermod -aG dialout $USER
+sudo reboot
 ```
 
 ###Linux and Mac OS X
