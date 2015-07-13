@@ -35,7 +35,7 @@ dev = devs[name][serial_number]
 
 More Detailed Examples:
 
-<https://github.com/JaneliaSciComp/modular_device_arduino>
+<https://github.com/janelia-modular-devices/modular_device_arduino>
 
 ##Installation
 
