@@ -21,7 +21,7 @@ setup(
     long_description=long_description,
 
     # The project's main homepage.
-    url='https://github.com/janelia-modular-devices/modular_device_python',
+    url='https://github.com/janelia-pypi/modular_device_python',
 
     # Author details
     author='Peter Polidoro',
