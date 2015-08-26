@@ -314,7 +314,13 @@ def json_decode_list(data):
         rv.append(item)
     return rv
 
-def find_modular_device_ports(baudrate=None, model_number=None, serial_number=None, try_ports=None, debug=DEBUG):
+def find_modular_device_ports(baudrate=None,
+                              model_number=None,
+                              serial_number=None,
+                              try_ports=None,
+                              debug=DEBUG,
+                              *args,
+                              **kwargs):
     serial_device_ports = find_serial_device_ports(try_ports=try_ports, debug=debug)
     os_type = platform.system()
     if os_type == 'Darwin':
@@ -339,7 +345,11 @@ def find_modular_device_ports(baudrate=None, model_number=None, serial_number=No
             pass
     return modular_device_ports
 
-def find_modular_device_port(baudrate=None, model_number=None, serial_number=None, try_ports=None, debug=DEBUG):
+def find_modular_device_port(baudrate=None,
+                             model_number=None,
+                             serial_number=None,
+                             try_ports=None,
+                             debug=DEBUG):
     modular_device_ports = find_modular_device_ports(baudrate=baudrate,
                                                      model_number=model_number,
                                                      serial_number=serial_number,
