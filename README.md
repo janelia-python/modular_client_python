@@ -39,6 +39,8 @@ More Detailed Examples:
 
 ##Installation
 
+[Setup Python](https://github.com/janelia-pypi/python_setup)
+
 ###Install Latest Version of Arduino on your Host Machine
 
 <http://arduino.cc/en/Guide/HomePage>
@@ -53,10 +55,6 @@ sudo reboot
 
 ###Linux and Mac OS X
 
-[Setup Python for Linux](./PYTHON_SETUP_LINUX.md)
-
-[Setup Python for Mac OS X](./PYTHON_SETUP_MAC_OS_X.md)
-
 ```shell
 mkdir -p ~/virtualenvs/modular_device
 virtualenv ~/virtualenvs/modular_device
@@ -65,8 +63,6 @@ pip install modular_device
 ```
 
 ###Windows
-
-[Setup Python for Windows](./PYTHON_SETUP_WINDOWS.md)
 
 ```shell
 virtualenv C:\virtualenvs\modular_device
