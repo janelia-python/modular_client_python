@@ -1,5 +1,4 @@
-modular_device_python
-=====================
+#modular_device_python
 
 This Python package (modular\_device) creates a class named
 ModularDevice, which contains an instance of
@@ -22,13 +21,22 @@ License:
 
 ```python
 from modular_device import ModularDevice
-dev = ModularDevice() # Automatically finds device if one available
-dev = ModularDevice('/dev/ttyACM0') # Linux specific port
-dev = ModularDevice('/dev/tty.usbmodem262471') # Mac OS X specific port
-dev = ModularDevice('COM3') # Windows specific port
+dev = ModularDevice() # Might automatically finds device if one available
+# if it is not found automatically, specify port directly
+dev = ModularDevice(port='/dev/ttyACM0') # Linux specific port
+dev = ModularDevice(port='/dev/tty.usbmodem262471') # Mac OS X specific port
+dev = ModularDevice(port='COM3') # Windows specific port
 dev.get_device_info()
 dev.get_methods()
-devs = ModularDevices()  # Automatically finds all available devices
+```
+
+```python
+from modular_device import ModularDevices
+devs = ModularDevices()  # Might automatically find all available devices
+# if they are not found automatically, specify ports to try
+devs = ModularDevices(try_ports=['/dev/ttyUSB0','/dev/ttyUSB1']) # Linux
+devs = ModularDevices(try_ports=['/dev/tty.usbmodem262471','/dev/tty.usbmodem262472']) # Mac OS X
+devs = ModularDevices(try_ports=['COM3','COM4']) # Windows
 devs.items()
 dev = devs[name][serial_number]
 ```
