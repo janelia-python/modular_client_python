@@ -248,10 +248,10 @@ class ModularDevices(dict):
     Example Usage:
 
     devs = ModularDevices()  # Might automatically find all available devices
-    # if they are not found automatically, specify ports to try
-    devs = ModularDevices(try_ports=['/dev/ttyUSB0','/dev/ttyUSB1']) # Linux
-    devs = ModularDevices(try_ports=['/dev/tty.usbmodem262471','/dev/tty.usbmodem262472']) # Mac OS X
-    devs = ModularDevices(try_ports=['COM3','COM4']) # Windows
+    # if they are not found automatically, specify ports to use
+    devs = ModularDevices(use_ports=['/dev/ttyUSB0','/dev/ttyUSB1']) # Linux
+    devs = ModularDevices(use_ports=['/dev/tty.usbmodem262471','/dev/tty.usbmodem262472']) # Mac OS X
+    devs = ModularDevices(use_ports=['COM3','COM4']) # Windows
     devs.items()
     dev = devs[name][serial_number]
     '''
