@@ -108,24 +108,24 @@ class ModularDevice(object):
     def _args_to_request(self,*args):
         request_list = ['[', ','.join(map(str,args)), ']']
         request = ''.join(request_list)
-        request = request + '\n';
+        request += '\n';
         return request
 
     def _send_request(self,*args):
-
-        '''Sends request to modular device over serial port and
-        returns number of bytes written'''
-
+        '''
+        Sends request to modular device over serial port and
+        returns number of bytes written
+        '''
         request = self._args_to_request(*args)
         self._debug_print('request', request)
         bytes_written = self._serial_device.write_check_freq(request,delay_write=True)
         return bytes_written
 
     def _send_request_get_response(self,*args):
-
-        '''Sends request to device over serial port and
-        returns response'''
-
+        '''
+        Sends request to device over serial port and
+        returns response
+        '''
         request = self._args_to_request(*args)
         self._debug_print('request', request)
         response = self._serial_device.write_read(request,use_readline=True,check_write_freq=True)
@@ -155,7 +155,7 @@ class ModularDevice(object):
                 try:
                     dev_error_message = '(from device) {0}'.format(response_dict['error_message'])
                 except KeyError:
-                    dev_error_message = "Error message missing."
+                    dev_error_message = 'Error message missing.'
                 error_message = '{0}'.format(dev_error_message)
                 raise IOError, error_message
         return response_dict
@@ -234,6 +234,20 @@ class ModularDevice(object):
         '''
         return [inflection.underscore(key) for key in self._method_dict.keys()]
 
+    def send_json_get_json(self,request,response_indent=None):
+        '''
+        Sends json request to device over serial port and returns json
+        response
+        '''
+        request_python = json.loads(request)
+        request = json.dumps(request_python,separators=(',',':'))
+        request += '\n'
+        self._debug_print('request', request)
+        response = self._serial_device.write_read(request,use_readline=True,check_write_freq=True)
+        response_python = json.loads(response)
+        response = json.dumps(response_python,separators=(',',':'),indent=response_indent)
+        return response
+
 
 class ModularDevices(dict):
     '''
@@ -286,10 +300,10 @@ def json_string_to_dict(json_string):
     return json_dict
 
 def json_decode_dict(data):
-    """
+    '''
     Object hook for decoding dictionaries from serialized json data. Ensures that
     all strings are unpacked as str objects rather than unicode.
-    """
+    '''
     rv = {}
     for key, value in data.iteritems():
         if isinstance(key, unicode):
@@ -304,10 +318,10 @@ def json_decode_dict(data):
     return rv
 
 def json_decode_list(data):
-    """
+    '''
     Object hook for decoding lists from serialized json data. Ensures that
     all strings are unpacked as str objects rather than unicode.
-    """
+    '''
     rv = []
     for item in data:
         if isinstance(item, unicode):
