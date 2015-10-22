@@ -41,9 +41,9 @@ devs.items()
 dev = devs[name][serial_number]
 ```
 
-More Detailed Examples:
+More Detailed Modular Device Information:
 
-<https://github.com/janelia-modular-devices/modular_device_arduino>
+<https://github.com/janelia-modular-devices/modular-devices>
 
 ##Installation
 
