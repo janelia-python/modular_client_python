@@ -41,7 +41,7 @@ devs.items()
 dev = devs[name][serial_number]
 ```
 
-More Detailed Modular Device Information:
+##More Detailed Modular Device Information
 
 <https://github.com/janelia-modular-devices/modular-devices>
 
