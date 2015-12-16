@@ -17,7 +17,7 @@ setup(
     # http://packaging.python.org/en/latest/tutorial.html#version
     version=get_git_version(),
 
-    description='Interface to modular devices with auto creation of class methods and auto discovery of available modular devices in Linux, Windows, and Mac OS X',
+    description='Modular device Python client interface for communicating with and calling remote methods on modular device servers.',
     long_description=long_description,
 
     # The project's main homepage.
@@ -57,7 +57,7 @@ setup(
     ],
 
     # What does your project relate to?
-    keywords='modular serial arduino device',
+    keywords='modular serial arduino device json json-rpc',
 
     # You can just specify the packages manually here if your project is
     # simple. Or you can use find_packages().

@@ -31,11 +31,13 @@ BAUDRATE = 9600
 
 class ModularDevice(object):
     '''
-    ModularDevice contains an instance of serial_device2.SerialDevice and
-    adds methods to it, like auto discovery of available modular devices
-    in Linux, Windows, and Mac OS X. This class automatically creates
-    methods from available functions reported by the modular device when
-    it is running the appropriate firmware.
+    ModularDevice contains an instance of serial_device2.SerialDevice
+    and adds methods to it, like auto discovery of available modular
+    devices in Linux, Windows, and Mac OS X. This class automatically
+    creates methods from available functions reported by the modular
+    device when it is running the appropriate firmware. This is the
+    modular device client library for communicating with and calling
+    remote methods on modular device servers.
 
     Example Usage:
 
@@ -46,13 +48,13 @@ class ModularDevice(object):
     dev = ModularDevice(port='COM3') # Windows specific port
     dev.get_device_info()
     dev.get_methods()
+
     '''
     _TIMEOUT = 0.05
     _WRITE_WRITE_DELAY = 0.05
     _RESET_DELAY = 2.0
     _METHOD_ID_GET_DEVICE_INFO = 0
     _METHOD_ID_GET_METHOD_IDS = 1
-    _METHOD_ID_GET_RESPONSE_CODES = 2
 
     def __init__(self,*args,**kwargs):
         model_number = None
@@ -90,8 +92,6 @@ class ModularDevice(object):
         self._serial_device = SerialDevice(*args,**kwargs)
         atexit.register(self._exit_modular_device)
         time.sleep(self._RESET_DELAY)
-        self._response_dict = None
-        self._response_dict = self._get_response_dict()
         self._method_dict = self._get_method_dict()
         self._method_dict_inv = dict([(v,k) for (k,v) in self._method_dict.iteritems()])
         self._create_methods()
@@ -111,71 +111,69 @@ class ModularDevice(object):
         request += '\n';
         return request
 
-    def _send_request(self,*args):
-        '''
-        Sends request to modular device over serial port and
-        returns number of bytes written
-        '''
-        request = self._args_to_request(*args)
-        self._debug_print('request', request)
-        bytes_written = self._serial_device.write_check_freq(request,delay_write=True)
-        return bytes_written
+    def _handle_response(self,response,request_id):
+        if response is None:
+            error_message = 'Did not receive server response.'
+            raise IOError, error_message
+        try:
+            response_dict = json_string_to_dict(response)
+        except Exception, e:
+            error_message = 'Unable to parse server response {0}.'.format(str(e))
+            raise IOError, error_message
+        try:
+            id  = response_dict.pop('id')
+        except KeyError:
+            error_message = 'Server response does not contain id member.'
+            raise IOError, error_message
+        if not id == request_id:
+            raise IOError, 'Response id does not match request id.'
+        try:
+            error = response_dict.pop('error')
+            try:
+                message = error.pop('message')
+            except KeyError:
+                message = ''
+            try:
+                data = error.pop('data')
+            except KeyError:
+                data = ''
+            try:
+                code = error.pop('code')
+            except KeyError:
+                code = ''
+            error_message = '(from server) message: {0}, data: {1}, code: {2}'.format(message,data,code)
+            raise IOError, error_message
+        except KeyError:
+            pass
+        try:
+            result  = response_dict.pop('result')
+        except KeyError:
+            error_message = 'Server response does not contain result member.'
+            raise IOError, error_message
+        return result
 
-    def _send_request_get_response(self,*args):
+    def _send_request_get_result(self,*args):
         '''
-        Sends request to device over serial port and
-        returns response
+        Sends request to server over serial port and
+        returns response result
         '''
         request = self._args_to_request(*args)
         self._debug_print('request', request)
         response = self._serial_device.write_read(request,use_readline=True,check_write_freq=True)
-        if response is None:
-            response_dict = {}
-            return response_dict
         self._debug_print('response', response)
-        try:
-            response_dict = json_string_to_dict(response)
-        except Exception, e:
-            error_message = 'Unable to parse device response {0}.'.format(str(e))
-            raise IOError, error_message
-        try:
-            status = response_dict.pop('status')
-        except KeyError:
-            error_message = 'Device response does not contain status.'
-            raise IOError, error_message
-        try:
-            method_id  = response_dict.pop('method_id')
-        except KeyError:
-            error_message = 'Device response does not contain method_id.'
-            raise IOError, error_message
-        if not method_id == args[0]:
-            raise IOError, 'Device method_id does not match that sent.'
-        if self._response_dict is not None:
-            if status == self._response_dict['response_error']:
-                try:
-                    dev_error_message = '(from device) {0}'.format(response_dict['error_message'])
-                except KeyError:
-                    dev_error_message = 'Error message missing.'
-                error_message = '{0}'.format(dev_error_message)
-                raise IOError, error_message
-        return response_dict
+        result = self._handle_response(response,args[0])
+        return result
 
     def _get_method_dict(self):
-        method_dict = self._send_request_get_response(self._METHOD_ID_GET_METHOD_IDS)
+        method_dict = self._send_request_get_result(self._METHOD_ID_GET_METHOD_IDS)
         return method_dict
-
-    def _get_response_dict(self):
-        response_dict = self._send_request_get_response(self._METHOD_ID_GET_RESPONSE_CODES)
-        check_dict_for_key(response_dict,'response_success',dname='response_dict')
-        check_dict_for_key(response_dict,'response_error',dname='response_dict')
-        return response_dict
 
     def _send_request_by_method_name(self,name,*args):
         method_id = self._method_dict[name]
         method_args = [method_id]
         method_args.extend(args)
-        response = self._send_request_get_response(*method_args)
-        return response
+        result = self._send_request_get_result(*method_args)
+        return result
 
     def _method_func_base(self,method_name,*args):
         if len(args) == 1 and type(args[0]) is dict:
@@ -183,10 +181,8 @@ class ModularDevice(object):
             args_list = self._args_dict_to_list(args_dict)
         else:
             args_list = args
-        response_dict = self._send_request_by_method_name(method_name,*args_list)
-        if response_dict:
-            ret_value = self._process_response_dict(response_dict)
-            return ret_value
+        result = self._send_request_by_method_name(method_name,*args_list)
+        return result
 
     def _create_methods(self):
         self._method_func_dict = {}
@@ -194,21 +190,6 @@ class ModularDevice(object):
             method_func = functools.partial(self._method_func_base, method_name)
             setattr(self,inflection.underscore(method_name),method_func)
             self._method_func_dict[method_name] = method_func
-
-    def _process_response_dict(self,response_dict):
-        if len(response_dict) == 1:
-            ret_value = response_dict.values()[0]
-        else:
-            all_values_empty = True
-            for v in response_dict.values():
-                if not type(v) == str or v:
-                    all_values_empty = False
-                    break
-            if all_values_empty:
-                ret_value = sorted(response_dict.keys())
-            else:
-                ret_value = response_dict
-        return ret_value
 
     def _args_dict_to_list(self,args_dict):
         key_set = set(args_dict.keys())
@@ -226,7 +207,7 @@ class ModularDevice(object):
         return self._serial_device.port
 
     def get_device_info(self):
-        return self._send_request_get_response(self._METHOD_ID_GET_DEVICE_INFO)
+        return self._send_request_get_result(self._METHOD_ID_GET_DEVICE_INFO)
 
     def get_methods(self):
         '''
@@ -234,19 +215,49 @@ class ModularDevice(object):
         '''
         return [inflection.underscore(key) for key in self._method_dict.keys()]
 
-    def send_json_get_json(self,request,response_indent=None):
+    def call_server_method(self,method_name,*args):
+        method_name = inflection.camelize(method_name,False)
+        return self._send_request_get_result(method_name,*args)
+
+    def send_json_request(self,request):
         '''
-        Sends json request to device over serial port and returns json
-        response
+        Sends json request to device over serial port and returns result
         '''
         request_python = json.loads(request)
+        try:
+            request_id = request_python["id"]
+        except TypeError:
+            pass
+        except KeyError:
+            error_message = 'Request does not contain an id.'
+            raise IOError, error_message
+        try:
+            request_python["method"] = inflection.camelize(request_python["method"],False)
+        except TypeError:
+            pass
+        except KeyError:
+            error_message = 'Request does not contain a method.'
+            raise IOError, error_message
+        try:
+            request_python[0] = inflection.camelize(request_python[0],False)
+            request_id = request_python[0]
+        except IndexError:
+            error_message = 'Request does not contain a method.'
+            raise IOError, error_message
         request = json.dumps(request_python,separators=(',',':'))
         request += '\n'
         self._debug_print('request', request)
         response = self._serial_device.write_read(request,use_readline=True,check_write_freq=True)
-        response_python = json.loads(response)
-        response = json.dumps(response_python,separators=(',',':'),indent=response_indent)
-        return response
+        self._debug_print('response', response)
+        result = self._handle_response(response,request_id)
+        return result
+
+    def convert_to_json(self,python_to_convert,response_indent=None):
+        '''
+        Convert python object to json string.
+        '''
+        converted_json = json.dumps(python_to_convert,separators=(',',':'),indent=response_indent)
+        return converted_json
 
 
 class ModularDevices(dict):
