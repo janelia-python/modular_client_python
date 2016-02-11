@@ -106,8 +106,7 @@ class ModularDevice(object):
         pass
 
     def _args_to_request(self,*args):
-        request_list = ['[', ','.join(map(str,args)), ']']
-        request = ''.join(request_list)
+        request = json.dumps(args,separators=(',',':'))
         request += '\n';
         return request
 
