@@ -13,11 +13,11 @@ from serial_device2 import SerialDevice, SerialDevices, find_serial_device_ports
 
 try:
     from pkg_resources import get_distribution, DistributionNotFound
-    _dist = get_distribution('modular_device')
+    _dist = get_distribution('modular_client')
     # Normalize case for Windows systems
     dist_loc = os.path.normcase(_dist.location)
     here = os.path.normcase(__file__)
-    if not here.startswith(os.path.join(dist_loc, 'modular_device')):
+    if not here.startswith(os.path.join(dist_loc, 'modular_client')):
         # not installed, but there is another version that *is*
         raise DistributionNotFound
 except (ImportError,DistributionNotFound):
@@ -29,9 +29,9 @@ else:
 DEBUG = False
 BAUDRATE = 9600
 
-class ModularDevice(object):
+class ModularClient(object):
     '''
-    ModularDevice contains an instance of serial_device2.SerialDevice
+    ModularClient contains an instance of serial_device2.SerialDevice
     and adds methods to it, like auto discovery of available modular
     devices in Linux, Windows, and Mac OS X. This class automatically
     creates methods from available functions reported by the modular
@@ -41,11 +41,11 @@ class ModularDevice(object):
 
     Example Usage:
 
-    dev = ModularDevice() # Might automatically finds device if one available
+    dev = ModularClient() # Might automatically find device if one available
     # if it is not found automatically, specify port directly
-    dev = ModularDevice(port='/dev/ttyACM0') # Linux specific port
-    dev = ModularDevice(port='/dev/tty.usbmodem262471') # Mac OS X specific port
-    dev = ModularDevice(port='COM3') # Windows specific port
+    dev = ModularClient(port='/dev/ttyACM0') # Linux specific port
+    dev = ModularClient(port='/dev/tty.usbmodem262471') # Mac OS X specific port
+    dev = ModularClient(port='COM3') # Windows specific port
     dev.get_device_info()
     dev.get_methods()
 
@@ -90,7 +90,7 @@ class ModularDevice(object):
 
         t_start = time.time()
         self._serial_device = SerialDevice(*args,**kwargs)
-        atexit.register(self._exit_modular_device)
+        atexit.register(self._exit_modular_client)
         time.sleep(self._RESET_DELAY)
         self._method_dict = self._get_method_dict()
         self._method_dict_inv = dict([(v,k) for (k,v) in self._method_dict.iteritems()])
@@ -102,7 +102,7 @@ class ModularDevice(object):
         if self.debug:
             print(*args)
 
-    def _exit_modular_device(self):
+    def _exit_modular_client(self):
         pass
 
     def _args_to_request(self,*args):
@@ -259,23 +259,23 @@ class ModularDevice(object):
         return converted_json
 
 
-class ModularDevices(dict):
+class ModularClients(dict):
     '''
-    ModularDevices inherits from dict and automatically populates it with
-    ModularDevices on all available serial ports. Access each individual
-    device with two keys, the device name and the serial_number. If you
-    want to connect multiple ModularDevices with the same name at the
+    ModularClients inherits from dict and automatically populates it with
+    ModularClients on all available serial ports. Access each individual
+    client with two keys, the device name and the serial_number. If you
+    want to connect multiple ModularClients with the same name at the
     same time, first make sure they have unique serial_numbers by
     connecting each device one by one and using the set_serial_number
     method on each device.
 
     Example Usage:
 
-    devs = ModularDevices()  # Might automatically find all available devices
+    devs = ModularClients()  # Might automatically find all available devices
     # if they are not found automatically, specify ports to use
-    devs = ModularDevices(use_ports=['/dev/ttyUSB0','/dev/ttyUSB1']) # Linux
-    devs = ModularDevices(use_ports=['/dev/tty.usbmodem262471','/dev/tty.usbmodem262472']) # Mac OS X
-    devs = ModularDevices(use_ports=['COM3','COM4']) # Windows
+    devs = ModularClients(use_ports=['/dev/ttyUSB0','/dev/ttyUSB1']) # Linux
+    devs = ModularClients(use_ports=['/dev/tty.usbmodem262471','/dev/tty.usbmodem262472']) # Mac OS X
+    devs = ModularClients(use_ports=['COM3','COM4']) # Windows
     devs.items()
     dev = devs[name][serial_number]
     '''
@@ -290,7 +290,7 @@ class ModularDevices(dict):
             self._add_device(*args,**kwargs)
 
     def _add_device(self,*args,**kwargs):
-        dev = ModularDevice(*args,**kwargs)
+        dev = ModularClient(*args,**kwargs)
         device_info = dev.get_device_info()
         name = device_info['name']
         serial_number = device_info['serial_number']
@@ -363,7 +363,7 @@ def find_modular_device_ports(baudrate=None,
     modular_device_ports = {}
     for port in serial_device_ports:
         try:
-            dev = ModularDevice(port=port,baudrate=baudrate,debug=debug)
+            dev = ModularClient(port=port,baudrate=baudrate,debug=debug)
             device_info = dev.get_device_info()
             if ((model_number is None ) and (device_info['model_number'] is not None)) or (device_info['model_number'] in model_number):
                 if ((serial_number is None) and (device_info['serial_number'] is not None)) or (device_info['serial_number'] in serial_number):
@@ -401,4 +401,4 @@ def find_modular_device_port(baudrate=None,
 if __name__ == '__main__':
 
     debug = False
-    dev = ModularDevice(debug=debug)
+    dev = ModularClient(debug=debug)

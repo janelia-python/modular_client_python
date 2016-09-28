@@ -1,7 +1,7 @@
-modular_device_python
+modular_client_python
 =====================
 
-This Python package creates a class named ModularDevice, which
+This Python package creates a class named ModularClient, which
 contains an instance of serial_device2.SerialDevice and adds methods
 to it, like auto discovery of available modular devices in Linux,
 Windows, and Mac OS X. This class automatically creates methods from
@@ -20,20 +20,20 @@ License::
 
 Example Usage::
 
-    from modular_device import ModularDevice
-    dev = ModularDevice() # Might automatically finds device if one available
+    from modular_client import ModularClient
+    dev = ModularClient() # Might automatically find device if one available
     # if it is not found automatically, specify port directly
-    dev = ModularDevice(port='/dev/ttyACM0') # Linux specific port
-    dev = ModularDevice(port='/dev/tty.usbmodem262471') # Mac OS X specific port
-    dev = ModularDevice(port='COM3') # Windows specific port
+    dev = ModularClient(port='/dev/ttyACM0') # Linux specific port
+    dev = ModularClient(port='/dev/tty.usbmodem262471') # Mac OS X specific port
+    dev = ModularClient(port='COM3') # Windows specific port
     dev.get_device_info()
     dev.get_methods()
-    from modular_device import ModularDevices
-    devs = ModularDevices()  # Might automatically find all available devices
+    from modular_client import ModularClients
+    devs = ModularClients()  # Might automatically find all available devices
     # if they are not found automatically, specify ports to use
-    devs = ModularDevices(use_ports=['/dev/ttyUSB0','/dev/ttyUSB1']) # Linux
-    devs = ModularDevices(use_ports=['/dev/tty.usbmodem262471','/dev/tty.usbmodem262472']) # Mac OS X
-    devs = ModularDevices(use_ports=['COM3','COM4']) # Windows
+    devs = ModularClients(use_ports=['/dev/ttyUSB0','/dev/ttyUSB1']) # Linux
+    devs = ModularClients(use_ports=['/dev/tty.usbmodem262471','/dev/tty.usbmodem262472']) # Mac OS X
+    devs = ModularClients(use_ports=['COM3','COM4']) # Windows
     devs.items()
     dev = devs[name][serial_number]
 

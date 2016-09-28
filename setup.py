@@ -10,7 +10,7 @@ with open(path.join(here, 'DESCRIPTION.rst'), encoding='utf-8') as f:
     long_description = f.read()
 
 setup(
-    name='modular_device',
+    name='modular_client',
 
     # Versions should comply with PEP440.  For a discussion on single-sourcing
     # the version across setup.py and the project code, see
@@ -21,7 +21,7 @@ setup(
     long_description=long_description,
 
     # The project's main homepage.
-    url='https://github.com/janelia-pypi/modular_device_python',
+    url='https://github.com/janelia-pypi/modular_client_python',
 
     # Author details
     author='Peter Polidoro',
@@ -57,7 +57,7 @@ setup(
     ],
 
     # What does your project relate to?
-    keywords='modular serial arduino device json json-rpc',
+    keywords='modular serial arduino device client modulardevice modular-device modular_device modularclient modular-client modular_client json json-rpc',
 
     # You can just specify the packages manually here if your project is
     # simple. Or you can use find_packages().
