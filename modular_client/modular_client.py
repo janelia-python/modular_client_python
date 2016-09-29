@@ -46,18 +46,18 @@ class ModularClient(object):
     dev = ModularClient(port='/dev/ttyACM0') # Linux specific port
     dev = ModularClient(port='/dev/tty.usbmodem262471') # Mac OS X specific port
     dev = ModularClient(port='COM3') # Windows specific port
-    dev.get_device_info()
+    dev.get_device_id()
     dev.get_methods()
 
     '''
     _TIMEOUT = 0.05
     _WRITE_WRITE_DELAY = 0.05
     _RESET_DELAY = 2.0
-    _METHOD_ID_GET_DEVICE_INFO = 0
-    _METHOD_ID_GET_METHOD_IDS = 1
+    _METHOD_ID_GET_METHOD_IDS = 0
 
     def __init__(self,*args,**kwargs):
-        model_number = None
+        name = None
+        form_factor = None
         serial_number = None
         if 'debug' in kwargs:
             self.debug = kwargs['debug']
@@ -76,13 +76,16 @@ class ModularClient(object):
             kwargs.update({'timeout': self._TIMEOUT})
         if 'write_write_delay' not in kwargs:
             kwargs.update({'write_write_delay': self._WRITE_WRITE_DELAY})
-        if 'model_number' in kwargs:
-            model_number = kwargs.pop('model_number')
+        if 'name' in kwargs:
+            name = kwargs.pop('name')
+        if 'form_factor' in kwargs:
+            form_factor = kwargs.pop('form_factor')
         if 'serial_number' in kwargs:
             serial_number = kwargs.pop('serial_number')
         if ('port' not in kwargs) or (kwargs['port'] is None):
             port =  find_modular_device_port(baudrate=kwargs['baudrate'],
-                                             model_number=model_number,
+                                             name=name,
+                                             form_factor=form_factor,
                                              serial_number=serial_number,
                                              try_ports=try_ports,
                                              debug=kwargs['debug'])
@@ -205,9 +208,6 @@ class ModularClient(object):
     def get_port(self):
         return self._serial_device.port
 
-    def get_device_info(self):
-        return self._send_request_get_result(self._METHOD_ID_GET_DEVICE_INFO)
-
     def get_methods(self):
         '''
         Get a list of modular methods automatically attached as class methods.
@@ -261,10 +261,11 @@ class ModularClient(object):
 
 class ModularClients(dict):
     '''
-    ModularClients inherits from dict and automatically populates it with
-    ModularClients on all available serial ports. Access each individual
-    client with two keys, the device name and the serial_number. If you
-    want to connect multiple ModularClients with the same name at the
+    ModularClients inherits from dict and automatically populates it
+    with ModularClients on all available serial ports. Access each
+    individual client with three keys, the device name, the
+    form_factor, and the serial_number. If you want to connect
+    multiple ModularClients with the same name and form_factor at the
     same time, first make sure they have unique serial_numbers by
     connecting each device one by one and using the set_serial_number
     method on each device.
@@ -277,7 +278,8 @@ class ModularClients(dict):
     devs = ModularClients(use_ports=['/dev/tty.usbmodem262471','/dev/tty.usbmodem262472']) # Mac OS X
     devs = ModularClients(use_ports=['COM3','COM4']) # Windows
     devs.items()
-    dev = devs[name][serial_number]
+    dev = devs[name][form_factor][serial_number]
+
     '''
     def __init__(self,*args,**kwargs):
         if ('use_ports' not in kwargs) or (kwargs['use_ports'] is None):
@@ -291,12 +293,15 @@ class ModularClients(dict):
 
     def _add_device(self,*args,**kwargs):
         dev = ModularClient(*args,**kwargs)
-        device_info = dev.get_device_info()
-        name = device_info['name']
-        serial_number = device_info['serial_number']
+        device_id = dev.get_device_id()
+        name = device_id['name']
+        form_factor = device_id['form_factor']
+        serial_number = device_id['serial_number']
         if name not in self:
             self[name] = {}
-        self[name][serial_number] = dev
+        if form_factor not in self[name]:
+            self[name][form_factor] = {}
+        self[name][form_factor][serial_number] = dev
 
 
 def check_dict_for_key(d,k,dname=''):
@@ -344,7 +349,8 @@ def json_decode_list(data):
     return rv
 
 def find_modular_device_ports(baudrate=None,
-                              model_number=None,
+                              name=None,
+                              form_factor=None,
                               serial_number=None,
                               try_ports=None,
                               debug=DEBUG,
@@ -355,8 +361,10 @@ def find_modular_device_ports(baudrate=None,
     if os_type == 'Darwin':
         serial_device_ports = [x for x in serial_device_ports if 'tty.usbmodem' in x or 'tty.usbserial' in x]
 
-    if type(model_number) is int:
-        model_number = [model_number]
+    if type(name) is str:
+        name = [name]
+    if type(form_factor) is str:
+        form_factor = [form_factor]
     if type(serial_number) is int:
         serial_number = [serial_number]
 
@@ -364,23 +372,27 @@ def find_modular_device_ports(baudrate=None,
     for port in serial_device_ports:
         try:
             dev = ModularClient(port=port,baudrate=baudrate,debug=debug)
-            device_info = dev.get_device_info()
-            if ((model_number is None ) and (device_info['model_number'] is not None)) or (device_info['model_number'] in model_number):
-                if ((serial_number is None) and (device_info['serial_number'] is not None)) or (device_info['serial_number'] in serial_number):
-                    modular_device_ports[port] = {'model_number': device_info['model_number'],
-                                                  'serial_number': device_info['serial_number']}
+            device_id = dev.get_device_id()
+            if ((name is None ) and (device_id['name'] is not None)) or (device_id['name'] in name):
+                if ((form_factor is None) and (device_id['form_factor'] is not None)) or (device_id['form_factor'] in form_factor):
+                    if ((serial_number is None) and (device_id['serial_number'] is not None)) or (device_id['serial_number'] in serial_number):
+                        modular_device_ports[port] = {'name': device_id['name'],
+                                                      'form_factor': device_id['form_factor'],
+                                                      'serial_number': device_id['serial_number']}
             dev.close()
         except (serial.SerialException, IOError):
             pass
     return modular_device_ports
 
 def find_modular_device_port(baudrate=None,
-                             model_number=None,
+                             name=None,
+                             form_factor=None,
                              serial_number=None,
                              try_ports=None,
                              debug=DEBUG):
     modular_device_ports = find_modular_device_ports(baudrate=baudrate,
-                                                     model_number=model_number,
+                                                     name=name,
+                                                     form_factor=form_factor,
                                                      serial_number=serial_number,
                                                      try_ports=try_ports,
                                                      debug=debug)
@@ -392,7 +404,7 @@ def find_modular_device_port(baudrate=None,
         err_string += 'Tried ports: ' + str(serial_device_ports)
         raise RuntimeError(err_string)
     else:
-        err_string = 'Found more than one Modular device. Specify port or model_number and/or serial_number.\n'
+        err_string = 'Found more than one Modular device. Specify port or name and/or form_factor and/or serial_number.\n'
         err_string += 'Matching ports: ' + str(modular_device_ports)
         raise RuntimeError(err_string)
 

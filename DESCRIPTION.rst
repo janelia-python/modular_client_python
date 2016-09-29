@@ -26,7 +26,7 @@ Example Usage::
     dev = ModularClient(port='/dev/ttyACM0') # Linux specific port
     dev = ModularClient(port='/dev/tty.usbmodem262471') # Mac OS X specific port
     dev = ModularClient(port='COM3') # Windows specific port
-    dev.get_device_info()
+    dev.get_device_id()
     dev.get_methods()
     from modular_client import ModularClients
     devs = ModularClients()  # Might automatically find all available devices
@@ -35,5 +35,5 @@ Example Usage::
     devs = ModularClients(use_ports=['/dev/tty.usbmodem262471','/dev/tty.usbmodem262472']) # Mac OS X
     devs = ModularClients(use_ports=['COM3','COM4']) # Windows
     devs.items()
-    dev = devs[name][serial_number]
+    dev = devs[name][form_factor][serial_number]
 
