@@ -27,7 +27,7 @@ else:
 
 
 DEBUG = False
-BAUDRATE = 9600
+BAUDRATE = 115200
 
 class ModularClient(object):
     '''
