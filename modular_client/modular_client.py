@@ -119,7 +119,7 @@ class ModularClient(object):
             raise IOError(error_message)
         try:
             response_dict = json_string_to_dict(response)
-        except Exception, e:
+        except Exception as e:
             error_message = 'Unable to parse server response {0}.'.format(str(e))
             raise IOError(error_message)
         try:
