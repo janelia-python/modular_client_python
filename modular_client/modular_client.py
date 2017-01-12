@@ -96,7 +96,10 @@ class ModularClient(object):
         atexit.register(self._exit_modular_client)
         time.sleep(self._RESET_DELAY)
         self._method_dict = self._get_method_dict()
-        self._method_dict_inv = dict([(v,k) for (k,v) in self._method_dict.iteritems()])
+        try:
+            self._method_dict_inv = dict([(v,k) for (k,v) in self._method_dict.items()])
+        except AttributeError:
+            self._method_dict_inv = dict([(v,k) for (k,v) in self._method_dict.iteritems()])
         self._create_methods()
         t_end = time.time()
         self._debug_print('Initialization time =', (t_end - t_start))
@@ -163,6 +166,9 @@ class ModularClient(object):
         self._debug_print('request', request)
         response = self._serial_device.write_read(request,use_readline=True,check_write_freq=True)
         self._debug_print('response', response)
+        if (type(response) != str):
+            response = response.decode('utf-8')
+        self._debug_print('type(response)', type(response))
         result = self._handle_response(response,args[0])
         return result
 
@@ -195,7 +201,10 @@ class ModularClient(object):
 
     def _args_dict_to_list(self,args_dict):
         key_set = set(args_dict.keys())
-        order_list = sorted([(num,name) for (name,num) in order_dict.iteritems()])
+        try:
+            order_list = sorted([(num,name) for (name,num) in order_dict.items()])
+        except AttributeError:
+            order_list = sorted([(num,name) for (name,num) in order_dict.iteritems()])
         args_list = [args_dict[name] for (num, name) in order_list]
         return args_list
 
@@ -212,7 +221,7 @@ class ModularClient(object):
         '''
         Get a list of modular methods automatically attached as class methods.
         '''
-        return [inflection.underscore(key) for key in self._method_dict.keys()]
+        return [inflection.underscore(key) for key in list(self._method_dict.keys())]
 
     def call_server_method(self,method_name,*args):
         method_name = inflection.camelize(method_name,False)
@@ -320,16 +329,24 @@ def json_decode_dict(data):
     all strings are unpacked as str objects rather than unicode.
     '''
     rv = {}
-    for key, value in data.iteritems():
-        if isinstance(key, unicode):
-            key = key.encode('utf-8')
-        if isinstance(value, unicode):
-            value = value.encode('utf-8')
-        elif isinstance(value, list):
-            value = json_decode_list(value)
-        elif isinstance(value, dict):
-            value = json_decode_dict(value)
-        rv[key] = value
+    try:
+        for key, value in data.iteritems():
+            if isinstance(key, unicode):
+                key = key.encode('utf-8')
+            if isinstance(value, unicode):
+                value = value.encode('utf-8')
+            elif isinstance(value, list):
+                value = json_decode_list(value)
+            elif isinstance(value, dict):
+                value = json_decode_dict(value)
+            rv[key] = value
+    except (AttributeError,NameError):
+        for key, value in data.items():
+            if isinstance(value, list):
+                value = json_decode_list(value)
+            elif isinstance(value, dict):
+                value = json_decode_dict(value)
+            rv[key] = value
     return rv
 
 def json_decode_list(data):
@@ -338,14 +355,22 @@ def json_decode_list(data):
     all strings are unpacked as str objects rather than unicode.
     '''
     rv = []
-    for item in data:
-        if isinstance(item, unicode):
-            item = item.encode('utf-8')
-        elif isinstance(item, list):
-            item = json_decode_list(item)
-        elif isinstance(item, dict):
-            item = json_decode_dict(item)
-        rv.append(item)
+    try:
+        for item in data:
+            if isinstance(item, unicode):
+                item = item.encode('utf-8')
+            elif isinstance(item, list):
+                item = json_decode_list(item)
+            elif isinstance(item, dict):
+                item = json_decode_dict(item)
+            rv.append(item)
+    except NameError:
+        for item in data:
+            if isinstance(item, list):
+                item = json_decode_list(item)
+            elif isinstance(item, dict):
+                item = json_decode_dict(item)
+            rv.append(item)
     return rv
 
 def find_modular_device_ports(baudrate=None,
@@ -397,7 +422,7 @@ def find_modular_device_port(baudrate=None,
                                                      try_ports=try_ports,
                                                      debug=debug)
     if len(modular_device_ports) == 1:
-        return modular_device_ports.keys()[0]
+        return list(modular_device_ports.keys())[0]
     elif len(modular_device_ports) == 0:
         serial_device_ports = find_serial_device_ports(try_ports)
         err_string = 'Could not find any Modular devices. Check connections and permissions.\n'
