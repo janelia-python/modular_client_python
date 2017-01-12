@@ -77,8 +77,6 @@ pip install modular_client
 
 ```shell
 virtualenv C:\virtualenvs\modular_client
-#Python3
-virtualenv -p python3 C:\virtualenvs\modular_client
 C:\virtualenvs\modular_client\Scripts\activate
 pip install modular_client
 ```
