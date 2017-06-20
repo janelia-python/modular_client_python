@@ -223,9 +223,12 @@ class ModularClient(object):
         '''
         return [inflection.underscore(key) for key in list(self._method_dict.keys())]
 
-    def call_server_method(self,method_name,*args):
+    def call_get_result(self,method_name,*args):
         method_name = inflection.camelize(method_name,False)
         return self._send_request_get_result(method_name,*args)
+
+    def call(self,method_name,*args):
+        self.call_get_result(method_name,*args)
 
     def send_json_request(self,request):
         '''
@@ -267,6 +270,31 @@ class ModularClient(object):
         converted_json = json.dumps(python_to_convert,separators=(',',':'),indent=response_indent)
         return converted_json
 
+    def save_api(self,firmware='ALL',output_directory=None):
+        '''
+        Save api as a set of json files.
+        '''
+        if output_directory is None:
+            output_directory = os.path.curdir
+        elif len(os.path.splitext(output_directory)[1]) > 0:
+            output_directory = os.path.dirname(output_directory)
+        output_directory = os.path.join(output_directory,'api')
+        if not os.path.exists(output_directory):
+            os.makedirs(output_directory)
+        device_info = self.call_get_result('getDeviceInfo')
+        for firmware_info in device_info['firmware']:
+            if (firmware == 'ALL') or (firmware == firmware_info['name']):
+                result = self.call_get_result('getApiVerbose',[firmware_info['name']])
+                api = {}
+                api['id'] = 'getApiVerbose'
+                api['result'] = result
+                output_path = os.path.join(output_directory,firmware_info['name'] + '.json')
+                api_file = open(output_path,'w')
+                json.dump(api,api_file,separators=(',',':'),indent=2)
+        try:
+            os.removedirs(output_directory)
+        except OSError:
+            pass
 
 class ModularClients(dict):
     '''
