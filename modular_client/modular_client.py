@@ -270,6 +270,50 @@ class ModularClient(object):
         converted_json = json.dumps(python_to_convert,separators=(',',':'),indent=response_indent)
         return converted_json
 
+    def save_device_id(self,output_directory):
+        '''
+        Save device_id as a json file.
+        '''
+        if output_directory is None:
+            output_directory = os.path.join(os.path.curdir)
+        elif len(os.path.splitext(output_directory)[1]) > 0:
+            output_directory = os.path.dirname(output_directory)
+        if not os.path.exists(output_directory):
+            os.makedirs(output_directory)
+        result = self.call_get_result('getDeviceId')
+        output = {}
+        output['id'] = 'getDeviceId'
+        output['result'] = result
+        output_path = os.path.join(output_directory,'device_id.json')
+        with open(output_path,'w') as output_file:
+            json.dump(output,output_file,separators=(',',':'),indent=2)
+        try:
+            os.removedirs(output_directory)
+        except OSError:
+            pass
+
+    def save_device_info(self,output_directory):
+        '''
+        Save device_info as a json file.
+        '''
+        if output_directory is None:
+            output_directory = os.path.join(os.path.curdir)
+        elif len(os.path.splitext(output_directory)[1]) > 0:
+            output_directory = os.path.dirname(output_directory)
+        if not os.path.exists(output_directory):
+            os.makedirs(output_directory)
+        result = self.call_get_result('getDeviceInfo')
+        output = {}
+        output['id'] = 'getDeviceInfo'
+        output['result'] = result
+        output_path = os.path.join(output_directory,'device_info.json')
+        with open(output_path,'w') as output_file:
+            json.dump(output,output_file,separators=(',',':'),indent=2)
+        try:
+            os.removedirs(output_directory)
+        except OSError:
+            pass
+
     def save_api(self,output_directory,firmware='ALL'):
         '''
         Save api as a set of json files.
