@@ -270,15 +270,14 @@ class ModularClient(object):
         converted_json = json.dumps(python_to_convert,separators=(',',':'),indent=response_indent)
         return converted_json
 
-    def save_api(self,firmware='ALL',output_directory=None):
+    def save_api(self,output_directory,firmware='ALL'):
         '''
         Save api as a set of json files.
         '''
         if output_directory is None:
-            output_directory = os.path.curdir
+            output_directory = os.path.join(os.path.curdir,'api')
         elif len(os.path.splitext(output_directory)[1]) > 0:
             output_directory = os.path.dirname(output_directory)
-        output_directory = os.path.join(output_directory,'api')
         if not os.path.exists(output_directory):
             os.makedirs(output_directory)
         device_info = self.call_get_result('getDeviceInfo')
@@ -289,8 +288,8 @@ class ModularClient(object):
                 api['id'] = 'getApiVerbose'
                 api['result'] = result
                 output_path = os.path.join(output_directory,firmware_info['name'] + '.json')
-                api_file = open(output_path,'w')
-                json.dump(api,api_file,separators=(',',':'),indent=2)
+                with open(output_path,'w') as api_file:
+                    json.dump(api,api_file,separators=(',',':'),indent=2)
         try:
             os.removedirs(output_directory)
         except OSError:
