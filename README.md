@@ -1,4 +1,4 @@
-#modular_client_python
+# modular_client_python
 
 This Python package (modular\_client) creates a class named
 ModularClient, which contains an instance of
@@ -17,7 +17,7 @@ License:
 
     BSD
 
-##Example Usage
+## Example Usage
 
 
 ```python
@@ -42,27 +42,19 @@ devs.items()
 dev = devs[name][form_factor][serial_number]
 ```
 
-##More Detailed Modular Device Information
+## More Detailed Modular Device Information
 
 <https://github.com/janelia-modular-devices/modular-devices>
 
-##Installation
+## Installation
 
 [Setup Python](https://github.com/janelia-pypi/python_setup)
 
-###Install Latest Version of Arduino on your Host Machine
+### Install Arduino and Teensyduino on your Host Machine
 
-<http://arduino.cc/en/Guide/HomePage>
+[Setup Arduino](https://github.com/janelia-arduino/arduino_setup)
 
-On linux, you may need to add yourself to the group 'dialout' in order
-to have write permissions on the USB port:
-
-```shell
-sudo usermod -aG dialout $USER
-sudo reboot
-```
-
-###Linux and Mac OS X
+### Linux and Mac OS X
 
 ```shell
 mkdir -p ~/virtualenvs/modular_client
@@ -73,7 +65,7 @@ source ~/virtualenvs/modular_client/bin/activate
 pip install modular_client
 ```
 
-###Windows
+### Windows
 
 ```shell
 virtualenv C:\virtualenvs\modular_client
