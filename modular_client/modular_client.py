@@ -314,7 +314,7 @@ class ModularClient(object):
         except OSError:
             pass
 
-    def save_api(self,output_directory,firmware='ALL'):
+    def save_api(self,output_directory,verbosity='GENERAL',firmware='ALL'):
         '''
         Save api as a set of json files.
         '''
@@ -327,9 +327,9 @@ class ModularClient(object):
         device_info = self.call_get_result('getDeviceInfo')
         for firmware_info in device_info['firmware']:
             if (firmware == 'ALL') or (firmware == firmware_info['name']):
-                result = self.call_get_result('getApiVerbose',[firmware_info['name']])
+                result = self.call_get_result('getApi',verbosity,[firmware_info['name']])
                 api = {}
-                api['id'] = 'getApiVerbose'
+                api['id'] = 'getApi'
                 api['result'] = result
                 output_path = os.path.join(output_directory,firmware_info['name'] + '.json')
                 with open(output_path,'w') as api_file:
