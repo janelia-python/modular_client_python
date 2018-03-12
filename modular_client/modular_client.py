@@ -314,7 +314,7 @@ class ModularClient(object):
         except OSError:
             pass
 
-    def save_api(self,output_directory,verbosity='GENERAL',firmware='ALL'):
+    def save_api(self,output_directory,verbosity='DETAILED',firmware='ALL'):
         '''
         Save api as a set of json files.
         '''
