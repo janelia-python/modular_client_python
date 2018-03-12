@@ -68,7 +68,7 @@ setup(
     # requirements files see:
     # https://packaging.python.org/en/latest/technical.html#install-requires-vs-requirements-files
     install_requires=['pyserial',
-                      'serial_device2',
+                      'serial_interface',
                       'inflection',
     ],
 

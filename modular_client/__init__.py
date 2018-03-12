@@ -1,6 +1,6 @@
 '''
 This Python package (modular_client) creates a class named ModularClient,
-which contains an instance of serial_device2.SerialDevice and adds
+which contains an instance of serial_interface.SerialInterface and adds
 methods to it, like auto discovery of available modular devices in Linux,
 Windows, and Mac OS X. This class automatically creates methods from
 available functions reported by the modular device when it is running the

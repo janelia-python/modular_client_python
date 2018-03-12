@@ -9,7 +9,7 @@ import platform
 import os
 import inflection
 
-from serial_device2 import SerialDevice, SerialDevices, find_serial_device_ports, WriteFrequencyError
+from serial_interface import SerialInterface, SerialInterfaces, find_serial_interface_ports, WriteFrequencyError
 
 try:
     from pkg_resources import get_distribution, DistributionNotFound
@@ -31,7 +31,7 @@ BAUDRATE = 115200
 
 class ModularClient(object):
     '''
-    ModularClient contains an instance of serial_device2.SerialDevice
+    ModularClient contains an instance of serial_interface.SerialInterface
     and adds methods to it, like auto discovery of available modular
     devices in Linux, Windows, and Mac OS X. This class automatically
     creates methods from available functions reported by the modular
@@ -92,7 +92,7 @@ class ModularClient(object):
             kwargs.update({'port': port})
 
         t_start = time.time()
-        self._serial_device = SerialDevice(*args,**kwargs)
+        self._serial_interface = SerialInterface(*args,**kwargs)
         atexit.register(self._exit_modular_client)
         time.sleep(self._RESET_DELAY)
         self._method_dict = self._get_method_dict()
@@ -164,7 +164,7 @@ class ModularClient(object):
         '''
         request = self._args_to_request(*args)
         self._debug_print('request', request)
-        response = self._serial_device.write_read(request,use_readline=True,check_write_freq=True)
+        response = self._serial_interface.write_read(request,use_readline=True,check_write_freq=True)
         self._debug_print('response', response)
         if (type(response) != str):
             response = response.decode('utf-8')
@@ -212,10 +212,10 @@ class ModularClient(object):
         '''
         Close the device serial port.
         '''
-        self._serial_device.close()
+        self._serial_interface.close()
 
     def get_port(self):
-        return self._serial_device.port
+        return self._serial_interface.port
 
     def get_methods(self):
         '''
@@ -258,7 +258,7 @@ class ModularClient(object):
         request = json.dumps(request_python,separators=(',',':'))
         request += '\n'
         self._debug_print('request', request)
-        response = self._serial_device.write_read(request,use_readline=True,check_write_freq=True)
+        response = self._serial_interface.write_read(request,use_readline=True,check_write_freq=True)
         self._debug_print('response', response)
         result = self._handle_response(response,request_id)
         return result
@@ -452,10 +452,10 @@ def find_modular_device_ports(baudrate=None,
                               debug=DEBUG,
                               *args,
                               **kwargs):
-    serial_device_ports = find_serial_device_ports(try_ports=try_ports, debug=debug)
+    serial_interface_ports = find_serial_interface_ports(try_ports=try_ports, debug=debug)
     os_type = platform.system()
     if os_type == 'Darwin':
-        serial_device_ports = [x for x in serial_device_ports if 'tty.usbmodem' in x or 'tty.usbserial' in x]
+        serial_interface_ports = [x for x in serial_interface_ports if 'tty.usbmodem' in x or 'tty.usbserial' in x]
 
     if type(name) is str:
         name = [name]
@@ -465,7 +465,7 @@ def find_modular_device_ports(baudrate=None,
         serial_number = [serial_number]
 
     modular_device_ports = {}
-    for port in serial_device_ports:
+    for port in serial_interface_ports:
         try:
             dev = ModularClient(port=port,baudrate=baudrate,debug=debug)
             device_id = dev.get_device_id()
@@ -495,9 +495,9 @@ def find_modular_device_port(baudrate=None,
     if len(modular_device_ports) == 1:
         return list(modular_device_ports.keys())[0]
     elif len(modular_device_ports) == 0:
-        serial_device_ports = find_serial_device_ports(try_ports)
+        serial_interface_ports = find_serial_interface_ports(try_ports)
         err_string = 'Could not find any Modular devices. Check connections and permissions.\n'
-        err_string += 'Tried ports: ' + str(serial_device_ports)
+        err_string += 'Tried ports: ' + str(serial_interface_ports)
         raise RuntimeError(err_string)
     else:
         err_string = 'Found more than one Modular device. Specify port or name and/or form_factor and/or serial_number.\n'
