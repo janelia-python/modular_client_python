@@ -51,7 +51,8 @@ class ModularClient(object):
 
     '''
     _TIMEOUT = 0.05
-    _WRITE_WRITE_DELAY = 0.05
+    _WRITE_READ_DELAY = 0.001
+    _WRITE_WRITE_DELAY = 0.005
     _RESET_DELAY = 2.0
     _METHOD_ID_GET_METHOD_IDS = 0
 
@@ -74,6 +75,8 @@ class ModularClient(object):
             kwargs.update({'baudrate': BAUDRATE})
         if 'timeout' not in kwargs:
             kwargs.update({'timeout': self._TIMEOUT})
+        if 'write_read_delay' not in kwargs:
+            kwargs.update({'write_read_delay': self._WRITE_READ_DELAY})
         if 'write_write_delay' not in kwargs:
             kwargs.update({'write_write_delay': self._WRITE_WRITE_DELAY})
         if 'name' in kwargs:
