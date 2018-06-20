@@ -19,25 +19,25 @@
 
 
   #+BEGIN_SRC python
-from modular_client import ModularClient
-dev = ModularClient() # Might automatically find device if one available
-# if it is not found automatically, specify port directly
-dev = ModularClient(port='/dev/ttyACM0') # Linux specific port
-dev = ModularClient(port='/dev/tty.usbmodem262471') # Mac OS X specific port
-dev = ModularClient(port='COM3') # Windows specific port
-dev.get_device_id()
-dev.get_methods()
+    from modular_client import ModularClient
+    dev = ModularClient() # Might automatically find device if one available
+    # if it is not found automatically, specify port directly
+    dev = ModularClient(port='/dev/ttyACM0') # Linux specific port
+    dev = ModularClient(port='/dev/tty.usbmodem262471') # Mac OS X specific port
+    dev = ModularClient(port='COM3') # Windows specific port
+    dev.get_device_id()
+    dev.get_methods()
   #+END_SRC
 
   #+BEGIN_SRC python
-from modular_client import ModularClients
-devs = ModularClients()  # Might automatically find all available devices
-# if they are not found automatically, specify ports to use
-devs = ModularClients(use_ports=['/dev/ttyUSB0','/dev/ttyUSB1']) # Linux
-devs = ModularClients(use_ports=['/dev/tty.usbmodem262471','/dev/tty.usbmodem262472']) # Mac OS X
-devs = ModularClients(use_ports=['COM3','COM4']) # Windows
-devs.items()
-dev = devs[name][form_factor][serial_number]
+    from modular_client import ModularClients
+    devs = ModularClients()  # Might automatically find all available devices
+    # if they are not found automatically, specify ports to use
+    devs = ModularClients(use_ports=['/dev/ttyUSB0','/dev/ttyUSB1']) # Linux
+    devs = ModularClients(use_ports=['/dev/tty.usbmodem262471','/dev/tty.usbmodem262472']) # Mac OS X
+    devs = ModularClients(use_ports=['COM3','COM4']) # Windows
+    devs.items()
+    dev = devs[name][form_factor][serial_number]
   #+END_SRC
 
 * More Detailed Modular Device Information
@@ -55,18 +55,18 @@ dev = devs[name][form_factor][serial_number]
 ** Linux and Mac OS X
 
    #+BEGIN_SRC sh
-mkdir -p ~/virtualenvs/modular_client
-virtualenv ~/virtualenvs/modular_client
-#Python3
-virtualenv -p python3 ~/virtualenvs/modular_client
-source ~/virtualenvs/modular_client/bin/activate
-pip install modular_client
+     mkdir -p ~/virtualenvs/modular_client
+     virtualenv ~/virtualenvs/modular_client
+     #Python3
+     virtualenv -p python3 ~/virtualenvs/modular_client
+     source ~/virtualenvs/modular_client/bin/activate
+     pip install modular_client
    #+END_SRC
 
 ** Windows
 
    #+BEGIN_SRC sh
-virtualenv C:\virtualenvs\modular_client
-C:\virtualenvs\modular_client\Scripts\activate
-pip install modular_client
+     virtualenv C:\virtualenvs\modular_client
+     C:\virtualenvs\modular_client\Scripts\activate
+     pip install modular_client
    #+END_SRC

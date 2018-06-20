@@ -368,7 +368,7 @@ class ModularClients(dict):
         if ('use_ports' not in kwargs) or (kwargs['use_ports'] is None):
             modular_device_ports = find_modular_device_ports(*args,**kwargs)
         else:
-            modular_device_ports = use_ports
+            modular_device_ports = kwargs['use_ports']
 
         for port in modular_device_ports:
             kwargs.update({'port': port})
