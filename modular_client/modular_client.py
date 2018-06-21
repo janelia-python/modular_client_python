@@ -365,10 +365,12 @@ class ModularClients(dict):
 
     '''
     def __init__(self,*args,**kwargs):
-        if ('use_ports' not in kwargs) or (kwargs['use_ports'] is None):
+        try:
+            modular_device_ports = kwargs.pop('use_ports')
+            if modular_device_ports is None:
+                raise KeyError
+        except KeyError:
             modular_device_ports = find_modular_device_ports(*args,**kwargs)
-        else:
-            modular_device_ports = kwargs['use_ports']
 
         for port in modular_device_ports:
             kwargs.update({'port': port})
