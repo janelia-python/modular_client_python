@@ -35,23 +35,18 @@ dev = devs[0]
 
 ###Linux and Mac OS X
 
-[Setup Python for Linux](./PYTHON_SETUP_LINUX.md)
-
-[Setup Python for Mac OS X](./PYTHON_SETUP_MAC_OS_X.md)
-
 ```shell
-mkdir -p ~/virtualenvs/arduino_device
-virtualenv ~/virtualenvs/arduino_device
-source ~/virtualenvs/arduino_device/bin/activate
+mkdir ~/venvs/
+cd ~/venvs/
+python3 -m venv arduino_device
+source ~/venvs/arduino_device/bin/activate
 pip install arduino_device
 ```
 
 ###Windows
 
-[Setup Python for Windows](./PYTHON_SETUP_WINDOWS.md)
-
 ```shell
-virtualenv C:\virtualenvs\arduino_device
-C:\virtualenvs\arduino_device\Scripts\activate
+python3 -m venv C:\venvs\arduino_device
+C:\venvs\arduino_device\Scripts\activate
 pip install arduino_device
 ```
