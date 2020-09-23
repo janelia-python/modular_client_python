@@ -8,6 +8,7 @@ import operator
 import platform
 import os
 import inflection
+import sre_yield
 
 from serial_interface import SerialInterface, SerialInterfaces, find_serial_interface_ports, WriteFrequencyError
 
@@ -30,30 +31,26 @@ DEBUG = False
 BAUDRATE = 115200
 
 class ModularClient(object):
-    '''
-    ModularClient contains an instance of serial_interface.SerialInterface
-    and adds methods to it, like auto discovery of available modular
-    devices in Linux, Windows, and Mac OS X. This class automatically
-    creates methods from available functions reported by the modular
-    device when it is running the appropriate firmware. This is the
-    modular device client library for communicating with and calling
-    remote methods on modular device servers.
+    '''ModularClient contains an instance of serial_interface.SerialInterface and
+    adds methods to it, like auto discovery of available modular devices in
+    Linux, Windows, and Mac OS X. This class automatically creates methods from
+    available functions reported by the modular device when it is running the
+    appropriate firmware. This is the modular device client library for
+    communicating with and calling remote methods on modular device servers.
 
     Example Usage:
 
-    dev = ModularClient() # Might automatically find device if one available
+    dev = ModularClient() # Tries to automatically find device if one available
     # if it is not found automatically, specify port directly
     dev = ModularClient(port='/dev/ttyACM0') # Linux specific port
     dev = ModularClient(port='/dev/tty.usbmodem262471') # Mac OS X specific port
     dev = ModularClient(port='COM3') # Windows specific port
     dev.get_device_id()
     dev.get_methods()
-
     '''
     _TIMEOUT = 0.05
     _WRITE_READ_DELAY = 0.001
     _WRITE_WRITE_DELAY = 0.005
-    _RESET_DELAY = 2.0
     _METHOD_ID_GET_METHOD_IDS = 0
 
     def __init__(self,*args,**kwargs):
@@ -97,7 +94,6 @@ class ModularClient(object):
         t_start = time.time()
         self._serial_interface = SerialInterface(*args,**kwargs)
         atexit.register(self._exit_modular_client)
-        time.sleep(self._RESET_DELAY)
         self._method_dict = self._get_method_dict()
         try:
             self._method_dict_inv = dict([(v,k) for (k,v) in self._method_dict.items()])
@@ -342,35 +338,46 @@ class ModularClient(object):
         except OSError:
             pass
 
-class ModularClients(dict):
-    '''
-    ModularClients inherits from dict and automatically populates it
-    with ModularClients on all available serial ports. Access each
-    individual client with three keys, the device name, the
-    form_factor, and the serial_number. If you want to connect
-    multiple ModularClients with the same name and form_factor at the
-    same time, first make sure they have unique serial_numbers by
-    connecting each device one by one and using the set_serial_number
-    method on each device.
+class ModularClientsDict(dict):
+    '''ModularClientsDict inherits from dict and automatically populates it with
+    modular clients on all available serial ports. Access each individual client
+    with three keys, the device name, the form_factor, and the serial_number. If
+    you want to connect multiple ModularClientsDict with the same name and
+    form_factor at the same time, first make sure they have unique
+    serial_numbers by connecting each device one by one and using the
+    set_serial_number method on each device.
 
     Example Usage:
 
-    devs = ModularClients()  # Might automatically find all available devices
+    devs = ModularClientsDict()  # Tries to automatically find all available devices
     # if they are not found automatically, specify ports to use
-    devs = ModularClients(use_ports=['/dev/ttyUSB0','/dev/ttyUSB1']) # Linux
-    devs = ModularClients(use_ports=['/dev/tty.usbmodem262471','/dev/tty.usbmodem262472']) # Mac OS X
-    devs = ModularClients(use_ports=['COM3','COM4']) # Windows
+    devs = ModularClientsDict(use_ports=['/dev/ttyUSB0','/dev/ttyUSB1']) # Linux
+    devs = ModularClientsDict(use_ports='(/dev/ttyUSB)[0-1]') # Linux string RE alternative
+    devs = ModularClientsDict(use_ports=['/dev/tty.usbmodem262471','/dev/tty.usbmodem262472']) # Mac OS X
+    devs = ModularClientsDict(use_ports='(/dev/tty\.usbmodem26247)[1-2]') # Mac OS X RE Alternative
+    devs = ModularClientsDict(use_ports=['COM3','COM4']) # Windows
+    devs = ModularClientsDict(use_ports='(COM)[3-4]') # Windows RE Alternative
     devs.items()
     dev = devs[name][form_factor][serial_number]
-
+    devs = ModularClientsDict(use_ports='(/dev/ttyACM)[0-1]',ports_as_keys=True)
+    dev = devs['/dev/ttyACM0']
     '''
     def __init__(self,*args,**kwargs):
         try:
             modular_device_ports = kwargs.pop('use_ports')
             if modular_device_ports is None:
                 raise KeyError
+            if isinstance(modular_device_ports,str):
+                modular_device_ports = list(sre_yield.AllStrings(modular_device_ports))
         except KeyError:
             modular_device_ports = find_modular_device_ports(*args,**kwargs)
+
+        try:
+            self.ports_as_keys = kwargs.pop('ports_as_keys')
+            if self.ports_as_keys is None:
+                raise KeyError
+        except KeyError:
+            self.ports_as_keys = False
 
         for port in modular_device_ports:
             kwargs.update({'port': port})
@@ -378,15 +385,46 @@ class ModularClients(dict):
 
     def _add_device(self,*args,**kwargs):
         dev = ModularClient(*args,**kwargs)
-        device_id = dev.get_device_id()
-        name = device_id['name']
-        form_factor = device_id['form_factor']
-        serial_number = device_id['serial_number']
-        if name not in self:
-            self[name] = {}
-        if form_factor not in self[name]:
-            self[name][form_factor] = {}
-        self[name][form_factor][serial_number] = dev
+        if not self.ports_as_keys:
+            device_id = dev.get_device_id()
+            name = device_id['name']
+            form_factor = device_id['form_factor']
+            serial_number = device_id['serial_number']
+            if name not in self:
+                self[name] = {}
+            if form_factor not in self[name]:
+                self[name][form_factor] = {}
+            self[name][form_factor][serial_number] = dev
+        else:
+            self[dev.get_port()] = dev
+
+class ModularClientsList(list):
+    '''ModularClientsList inherits from list and populates it with modular clients
+    on specified ports.
+
+    Example Usage:
+
+    devs = ModularClientsList(['/dev/ttyUSB0','/dev/ttyUSB1']) # Linux
+    devs = ModularClientsList('(/dev/ttyUSB)[0-1]') # Linux string RE alternative
+    devs = ModularClientsList(['/dev/tty.usbmodem262471','/dev/tty.usbmodem262472']) # Mac OS X
+    devs = ModularClientsList('(/dev/tty\.usbmodem26247)[1-2]') # Mac OS X RE Alternative
+    devs = ModularClientsList(['COM3','COM4']) # Windows
+    devs = ModularClientsList('(COM)[3-4]') # Windows RE Alternative
+    dev = devs[0]
+
+    '''
+    def __init__(self,use_ports,*args,**kwargs):
+        modular_device_ports = use_ports
+        if isinstance(modular_device_ports,str):
+            modular_device_ports = list(sre_yield.AllStrings(modular_device_ports))
+
+        for port in modular_device_ports:
+            kwargs.update({'port': port})
+            self._add_device(*args,**kwargs)
+
+    def _add_device(self,*args,**kwargs):
+        dev = ModularClient(*args,**kwargs)
+        self.append(dev)
 
 
 def check_dict_for_key(d,k,dname=''):

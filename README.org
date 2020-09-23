@@ -4,7 +4,7 @@
 
 * Package Information
   - Name :: modular_client_python
-  - Version :: 5.0.5
+  - Version :: 6.0.0
   - License :: BSD
   - URL :: https://github.com/janelia-pypi/modular_client_python
   - Author :: Peter Polidoro
@@ -24,8 +24,10 @@
 
   #+BEGIN_SRC python
     from modular_client import ModularClient
-    dev = ModularClient() # Might automatically find device if one available
-    # if it is not found automatically, specify port directly
+    dev = ModularClient()
+    # Will try to automatically find device if one available. This may be slow if it
+    # needs to search many serial ports. If it is not found automatically or to
+    # speed up, specify port directly.
     dev = ModularClient(port='/dev/ttyACM0') # Linux specific port
     dev = ModularClient(port='/dev/tty.usbmodem262471') # Mac OS X specific port
     dev = ModularClient(port='COM3') # Windows specific port
@@ -34,14 +36,32 @@
   #+END_SRC
 
   #+BEGIN_SRC python
-    from modular_client import ModularClients
-    devs = ModularClients()  # Might automatically find all available devices
-    # if they are not found automatically, specify ports to use
-    devs = ModularClients(use_ports=['/dev/ttyUSB0','/dev/ttyUSB1']) # Linux
-    devs = ModularClients(use_ports=['/dev/tty.usbmodem262471','/dev/tty.usbmodem262472']) # Mac OS X
-    devs = ModularClients(use_ports=['COM3','COM4']) # Windows
+    from modular_client import ModularClientsDict
+    devs = ModularClientsDict()
+    # Will try to automatically find all available devices. This may be slow if it
+    # needs to search many serial ports. If they are not found automatically or to
+    # speed up, specify ports to use.
+    devs = ModularClientsDict(use_ports=['/dev/ttyUSB0','/dev/ttyUSB1']) # Linux
+    devs = ModularClientsDict(use_ports='(/dev/ttyUSB)[0-1]') # Linux string RE alternative
+    devs = ModularClientsDict(use_ports=['/dev/tty.usbmodem262471','/dev/tty.usbmodem262472']) # Mac OS X
+    devs = ModularClientsDict(use_ports='(/dev/tty\.usbmodem26247)[1-2]') # Mac OS X RE Alternative
+    devs = ModularClientsDict(use_ports=['COM3','COM4']) # Windows
+    devs = ModularClientsDict(use_ports='(COM)[3-4]') # Windows RE Alternative
     devs.items()
     dev = devs[name][form_factor][serial_number]
+    devs = ModularClientsDict(use_ports='(/dev/ttyACM)[0-1]',ports_as_keys=True)
+    dev = devs['/dev/ttyACM0']
+  #+END_SRC
+
+  #+BEGIN_SRC python
+    from modular_client import ModularClientsList
+    devs = ModularClientsList(['/dev/ttyUSB0','/dev/ttyUSB1']) # Linux
+    devs = ModularClientsList('(/dev/ttyUSB)[0-1]') # Linux string RE alternative
+    devs = ModularClientsList(['/dev/tty.usbmodem262471','/dev/tty.usbmodem262472']) # Mac OS X
+    devs = ModularClientsList('(/dev/tty\.usbmodem26247)[1-2]') # Mac OS X RE Alternative
+    devs = ModularClientsList(['COM3','COM4']) # Windows
+    devs = ModularClientsList('(COM)[3-4]') # Windows RE Alternative
+    dev = devs[0]
   #+END_SRC
 
 * More Detailed Modular Device Information
@@ -59,18 +79,15 @@
 ** Linux and Mac OS X
 
    #+BEGIN_SRC sh
-     mkdir -p ~/virtualenvs/modular_client
-     virtualenv ~/virtualenvs/modular_client
-     #Python3
-     virtualenv -p python3 ~/virtualenvs/modular_client
-     source ~/virtualenvs/modular_client/bin/activate
+     python3 -m venv ~/venvs/modular_client
+     source ~/venvs/modular_client/bin/activate
      pip install modular_client
    #+END_SRC
 
 ** Windows
 
    #+BEGIN_SRC sh
-     virtualenv C:\virtualenvs\modular_client
-     C:\virtualenvs\modular_client\Scripts\activate
+     python34 -m venv C:\venvs\modular_client
+     C:\venvs\modular_client\Scripts\activate
      pip install modular_client
    #+END_SRC

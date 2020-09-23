@@ -70,6 +70,7 @@ setup(
     install_requires=['pyserial',
                       'serial_interface',
                       'inflection',
+                      'sre_yield',
     ],
 
     # If there are data files included in your packages that need to be
