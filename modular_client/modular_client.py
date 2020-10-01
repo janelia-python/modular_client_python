@@ -373,13 +373,18 @@ class ModularClients(dict):
     dev = devs['/dev/ttyACM0']
     '''
     def __init__(self,*args,**kwargs):
+        if 'key_port_debug' in kwargs:
+            self.key_port_debug = kwargs.pop('key_port_debug')
+        else:
+            self.key_port_debug = False
         try:
             modular_device_ports = kwargs.pop('use_ports')
             if modular_device_ports is None:
                 raise KeyError
             if isinstance(modular_device_ports,str):
                 modular_device_ports = list(sre_yield.AllStrings(modular_device_ports))
-            modular_device_ports = set(modular_device_ports)
+            if len(modular_device_ports) != len(set(modular_device_ports)):
+                raise KeyError
         except KeyError:
             modular_device_ports = find_modular_device_ports(*args,**kwargs)
 
@@ -389,8 +394,9 @@ class ModularClients(dict):
                 raise KeyError
             if isinstance(keys,str):
                 keys = list(sre_yield.AllStrings(keys))
-            keys = set(keys)
             if len(keys) != len(modular_device_ports):
+                raise KeyError
+            if len(keys) != len(set(keys)):
                 raise KeyError
         except (KeyError,TypeError):
             keys = [None] * len(modular_device_ports)
@@ -403,10 +409,14 @@ class ModularClients(dict):
             ports_as_keys = False
 
         for key,port in zip(keys,modular_device_ports):
-            kwargs.update({'port': port})
-            self._add_device(key,ports_as_keys,*args,**kwargs)
+            self._add_device(key,port,ports_as_keys,*args,**kwargs)
 
-    def _add_device(self,key,ports_as_keys,*args,**kwargs):
+    def _key_port_debug_print(self,key,port):
+        if self.key_port_debug:
+            print('key={0}, port={1}'.format(key,port))
+
+    def _add_device(self,key,port,ports_as_keys,*args,**kwargs):
+        kwargs.update({'port': port})
         dev = ModularClient(*args,**kwargs)
         if (key is None) and (not ports_as_keys):
             device_id = dev.get_device_id()
@@ -418,10 +428,14 @@ class ModularClients(dict):
             if form_factor not in self[name]:
                 self[name][form_factor] = {}
             self[name][form_factor][serial_number] = dev
+            self._key_port_debug_print('[{0}][{1}][{2}]'.format(name,form_factor,serial_number),port)
         elif key is not None:
             self[key] = dev
+            self._key_port_debug_print(key,port)
         else:
-            self[dev.get_port()] = dev
+            key = dev.get_port()
+            self[key] = dev
+            self._key_port_debug_print(key,port)
 
 def check_dict_for_key(d,k,dname=''):
     if not k in d:
