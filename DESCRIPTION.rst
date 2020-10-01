@@ -21,18 +21,31 @@ License::
 Example Usage::
 
     from modular_client import ModularClient
-    dev = ModularClient() # Might automatically find device if one available
-    # if it is not found automatically, specify port directly
+    dev = ModularClient()
+    # Will try to automatically find device if one available. This may be slow if it
+    # needs to search many serial ports. If it is not found automatically or to
+    # speed up, specify port directly.
     dev = ModularClient(port='/dev/ttyACM0') # Linux specific port
     dev = ModularClient(port='/dev/tty.usbmodem262471') # Mac OS X specific port
     dev = ModularClient(port='COM3') # Windows specific port
     dev.get_device_id()
     dev.get_methods()
     from modular_client import ModularClients
-    devs = ModularClients()  # Might automatically find all available devices
-    # if they are not found automatically, specify ports to use
-    devs = ModularClients(use_ports=['/dev/ttyUSB0','/dev/ttyUSB1']) # Linux
+    devs = ModularClients()
+    # Will try to automatically find all available devices. This may be slow if it
+    # needs to search many serial ports. If they are not found automatically or to
+    # speed up, specify ports to use.
+    devs = ModularClients(use_ports=['/dev/ttyACM0','/dev/ttyACM1']) # Linux
+    devs = ModularClients(use_ports='(/dev/ttyACM)[0-1]') # Linux string RE alternative
     devs = ModularClients(use_ports=['/dev/tty.usbmodem262471','/dev/tty.usbmodem262472']) # Mac OS X
+    devs = ModularClients(use_ports='(/dev/tty\.usbmodem26247)[1-2]') # Mac OS X RE Alternative
     devs = ModularClients(use_ports=['COM3','COM4']) # Windows
+    devs = ModularClients(use_ports='(COM)[3-4]') # Windows RE Alternative
     devs.items()
-    dev = devs[name][form_factor][serial_number]
+    # dev = devs[name][form_factor][serial_number]
+    devs = ModularClients(use_ports='(/dev/ttyACM)[0-1]',keys=[0,1])
+    dev = devs[0]
+    devs = ModularClients(use_ports='(/dev/ttyACM)[0-1]',keys='(device)[0-1]')
+    dev = devs['device0']
+    devs = ModularClients(use_ports='(/dev/ttyACM)[0-1]',ports_as_keys=True)
+    dev = devs['/dev/ttyACM0']
