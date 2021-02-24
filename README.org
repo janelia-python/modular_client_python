@@ -4,7 +4,7 @@
 
 * Package Information
   - Name :: modular_client_python
-  - Version :: 7.0.1
+  - Version :: 8.0.0
   - License :: BSD
   - URL :: https://github.com/janelia-pypi/modular_client_python
   - Author :: Peter Polidoro
@@ -23,6 +23,7 @@
 
 
   #+BEGIN_SRC python
+
     from modular_client import ModularClient
     dev = ModularClient()
     # Will try to automatically find device if one available. This may be slow if it
@@ -33,9 +34,11 @@
     dev = ModularClient(port='COM3') # Windows specific port
     dev.get_device_id()
     dev.get_methods()
+
   #+END_SRC
 
   #+BEGIN_SRC python
+
     from modular_client import ModularClients
     devs = ModularClients()
     # Will try to automatically find all available devices. This may be slow if it
@@ -55,6 +58,7 @@
     dev = devs['device0']
     devs = ModularClients(use_ports='(/dev/ttyACM)[0-1]',ports_as_keys=True)
     dev = devs['/dev/ttyACM0']
+
   #+END_SRC
 
 * More Detailed Modular Device Information
@@ -72,15 +76,65 @@
 ** Linux and Mac OS X
 
    #+BEGIN_SRC sh
+
      python3 -m venv ~/venvs/modular_client
      source ~/venvs/modular_client/bin/activate
      pip install modular_client
+
    #+END_SRC
 
 ** Windows
 
    #+BEGIN_SRC sh
+
      python3 -m venv C:\venvs\modular_client
      C:\venvs\modular_client\Scripts\activate
      pip install modular_client
+
+   #+END_SRC
+
+* Development
+
+** Build Docker Image
+
+   #+BEGIN_SRC sh
+
+     cd modular_client_python
+     docker stop $(docker ps -aq)
+     docker system prune -f
+     docker build -t modular_client_python:latest .
+
+   #+END_SRC
+
+** Run Docker Container
+
+   #+BEGIN_SRC sh
+
+     docker run -it --device=/dev/ttyACM0 modular_client_python:latest
+
+   #+END_SRC
+
+** Install This Package
+
+   #+BEGIN_SRC sh
+
+     cd modular_client_python
+     python setup.py install
+
+   #+END_SRC
+
+** Run ipython and Test
+
+   #+BEGIN_SRC sh
+
+     ipython
+
+   #+END_SRC
+
+** Commit, Tag, and Upload to Pypi
+
+   #+BEGIN_SRC sh
+
+     python setup.py sdist upload
+
    #+END_SRC
