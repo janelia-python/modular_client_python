@@ -137,5 +137,6 @@
      # git commit ...
      # git tag ...
      python3 setup.py sdist upload
+     git clean -xdf
 
    #+END_SRC
