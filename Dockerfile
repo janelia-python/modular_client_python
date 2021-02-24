@@ -13,9 +13,9 @@ RUN chown -R developer:developer $VIRTUAL_ENV
 
 ENV SETUPTOOLS_SCM_PRETEND_VERSION="1.2.3"
 
-ENV PACKAGE_PATH=/home/developer/modular_client_python/
-COPY . $PACKAGE_PATH
-RUN chown -R developer:developer $PACKAGE_PATH
+ENV DEVELOPMENT_PACKAGE_PATH=/home/developer/python_package/
+COPY . $DEVELOPMENT_PACKAGE_PATH
+RUN chown -R developer:developer $DEVELOPMENT_PACKAGE_PATH
 
 USER developer
 

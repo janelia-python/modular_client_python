@@ -99,10 +99,9 @@
 
    #+BEGIN_SRC sh
 
-     cd modular_client_python
      docker stop $(docker ps -aq)
      docker system prune -f
-     docker build -t modular_client_python:latest .
+     docker build -t python_package_development:latest .
 
    #+END_SRC
 
@@ -110,7 +109,7 @@
 
    #+BEGIN_SRC sh
 
-     docker run -it --device=/dev/ttyACM0 modular_client_python:latest
+     docker run -it --device=/dev/ttyACM0 python_package_development:latest
 
    #+END_SRC
 
@@ -118,7 +117,7 @@
 
    #+BEGIN_SRC sh
 
-     cd modular_client_python
+     cd python_package
      python setup.py install
 
    #+END_SRC
