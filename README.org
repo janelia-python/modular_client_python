@@ -134,6 +134,8 @@
 
    #+BEGIN_SRC sh
 
-     python setup.py sdist upload
+     # git commit ...
+     # git tag ...
+     python3 setup.py sdist upload
 
    #+END_SRC
