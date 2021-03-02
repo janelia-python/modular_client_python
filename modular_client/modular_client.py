@@ -192,7 +192,15 @@ class ModularClient(object):
             args_list = self._args_dict_to_list(args_dict)
         else:
             args_list = args
-        result = self._send_request_by_method_name(method_name,*args_list)
+        try:
+            result = self._send_request_by_method_name(method_name,*args_list)
+        except:
+            if not self.debug:
+                write_data = self._serial_interface._write_data
+                read_data = self._serial_interface._read_data
+                error_message = 'write_data:\n{0}\nread_data:\n{1}'.format(write_data,read_data)
+                print(error_message)
+            raise
         return result
 
     def _create_methods(self):
