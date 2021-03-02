@@ -4,7 +4,7 @@
 
 * Package Information
   - Name :: modular_client_python
-  - Version :: 8.0.3
+  - Version :: 8.1.0
   - License :: BSD
   - URL :: https://github.com/janelia-pypi/modular_client_python
   - Author :: Peter Polidoro

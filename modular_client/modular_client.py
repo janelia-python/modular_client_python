@@ -125,15 +125,16 @@ class ModularClient(object):
         try:
             response_dict = json_string_to_dict(response)
         except Exception as e:
-            error_message = 'Unable to parse server response {0}.'.format(str(e))
+            error_message = 'Error:\n{0}\nUnable to parse server response:\n{1}'.format(str(e),response)
             raise IOError(error_message)
         try:
-            id  = response_dict.pop('id')
+            response_id  = response_dict.pop('id')
         except KeyError:
-            error_message = 'Server response does not contain id member.'
+            error_message = 'Server response does not contain id member:\n{0}'.format(response)
             raise IOError(error_message)
-        if not id == request_id:
-            raise IOError('Response id does not match request id.')
+        if not response_id == request_id:
+            error_message = 'Response id:\n{0}\nDoes not match request id:\n{1}\nin response:{2}'.format(response_id,request_id,response)
+            raise IOError(error_message)
         try:
             error = response_dict.pop('error')
             try:
@@ -155,7 +156,7 @@ class ModularClient(object):
         try:
             result  = response_dict.pop('result')
         except KeyError:
-            error_message = 'Server response does not contain result member.'
+            error_message = 'Server response does not contain result member:\n{0}'.format(response)
             raise IOError(error_message)
         return result
 
@@ -242,20 +243,20 @@ class ModularClient(object):
         except TypeError:
             pass
         except KeyError:
-            error_message = 'Request does not contain an id.'
+            error_message = 'Request does not contain an id:\n{0}'.format(request)
             raise IOError(error_message)
         try:
             request_python["method"] = inflection.camelize(request_python["method"],False)
         except TypeError:
             pass
         except KeyError:
-            error_message = 'Request does not contain a method.'
+            error_message = 'Request does not contain a method:\n{0}'.format(request)
             raise IOError(error_message)
         try:
             request_python[0] = inflection.camelize(request_python[0],False)
             request_id = request_python[0]
         except IndexError:
-            error_message = 'Request does not contain a method.'
+            error_message = 'Request does not contain a method:\n{0}'.format(request)
             raise IOError(error_message)
         request = json.dumps(request_python,separators=(',',':'))
         request += '\n'
