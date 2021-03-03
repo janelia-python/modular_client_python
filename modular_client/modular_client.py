@@ -103,6 +103,8 @@ class ModularClient(object):
         except AttributeError:
             self._method_dict_inv = dict([(v,k) for (k,v) in self._method_dict.iteritems()])
         self._create_methods()
+        # store the device id to output during debugging
+        self._device_id = self.get_device_id()
         t_end = time.time()
         self._debug_print('Initialization time =', (t_end - t_start))
 
@@ -195,9 +197,11 @@ class ModularClient(object):
         try:
             result = self._send_request_by_method_name(method_name,*args_list)
         except Exception as e:
+            device_id = self._device_id
+            port = self.get_port()
             write_data = self._serial_interface._write_data
             read_data = self._serial_interface._read_data
-            error_message = 'serial_interface.write_data:{0},serial_interface.read_data:{1}'.format(write_data,read_data)
+            error_message = '\ndevice_id:\n{0}\nserial_port:\n{1}\nserial_write_data:\n{2}\nserial_read_data:\n{3}'.format(device_id,port,write_data,read_data)
             raise e from Exception(error_message)
         return result
 
