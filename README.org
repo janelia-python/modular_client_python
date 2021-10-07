@@ -10,19 +10,19 @@
   - Author :: Peter Polidoro
   - Email :: peter@polidoro.io
 
-  This Python package (modular_client) creates a class named
-  ModularClient, which contains an instance of
-  serial_device2.SerialInterface and adds methods to it, like auto
-  discovery of available modular devices in Linux, Windows, and Mac OS
-  X. This class automatically creates methods from available functions
-  reported by the modular client when it is running the appropriate
-  firmware. This is the modular device client library for communicating
-  with and calling remote methods on modular device servers.
+    This Python package (modular_client) creates a class named
+    ModularClient, which contains an instance of
+    serial_device2.SerialInterface and adds methods to it, like auto
+    discovery of available modular devices in Linux, Windows, and Mac OS
+    X. This class automatically creates methods from available functions
+    reported by the modular client when it is running the appropriate
+    firmware. This is the modular device client library for communicating
+    with and calling remote methods on modular device servers.
 
 * Example Usage
 
 
-  #+BEGIN_SRC python
+#+BEGIN_SRC python
 
     from modular_client import ModularClient
     dev = ModularClient()
@@ -35,9 +35,9 @@
     dev.get_device_id()
     dev.get_methods()
 
-  #+END_SRC
+#+END_SRC
 
-  #+BEGIN_SRC python
+#+BEGIN_SRC python
 
     from modular_client import ModularClients
     devs = ModularClients()
@@ -59,85 +59,37 @@
     devs = ModularClients(use_ports='(/dev/ttyACM)[0-1]',ports_as_keys=True)
     dev = devs['/dev/ttyACM0']
 
-  #+END_SRC
+#+END_SRC
 
 * More Detailed Modular Device Information
 
-  [[https://github.com/janelia-modular-devices/modular-devices]]
+[[https://github.com/janelia-modular-devices/modular-devices]]
 
 * Installation
 
-  [[https://github.com/janelia-pypi/python_setup]]
+[[https://github.com/janelia-pypi/python_setup]]
 
 ** Install Arduino and Teensyduino on your Host Machine
 
-   [[https://github.com/janelia-arduino/arduino_setup]]
+[[https://github.com/janelia-arduino/arduino_setup]]
 
 ** Linux and Mac OS X
 
-   #+BEGIN_SRC sh
+#+BEGIN_SRC sh
 
-     python3 -m venv ~/venvs/modular_client
-     source ~/venvs/modular_client/bin/activate
-     pip install modular_client
+python3 -m venv ~/venvs/modular_client
+source ~/venvs/modular_client/bin/activate
+pip install modular_client
 
-   #+END_SRC
+#+END_SRC
 
 ** Windows
 
-   #+BEGIN_SRC sh
+#+BEGIN_SRC sh
 
-     python3 -m venv C:\venvs\modular_client
-     C:\venvs\modular_client\Scripts\activate
-     pip install modular_client
+python3 -m venv C:\venvs\modular_client
+C:\venvs\modular_client\Scripts\activate
+pip install modular_client
 
-   #+END_SRC
+#+END_SRC
 
-* Development
-
-** Build Docker Image
-
-   #+BEGIN_SRC sh
-
-     docker stop $(docker ps -aq)
-     docker system prune -f
-     docker build -t python_package_development:latest .
-
-   #+END_SRC
-
-** Run Docker Container
-
-   #+BEGIN_SRC sh
-
-     docker run -it --device=/dev/ttyACM0 python_package_development:latest
-
-   #+END_SRC
-
-** Install This Package
-
-   #+BEGIN_SRC sh
-
-     cd python_package
-     python setup.py install
-
-   #+END_SRC
-
-** Run ipython and Test
-
-   #+BEGIN_SRC sh
-
-     ipython
-
-   #+END_SRC
-
-** Commit, Tag, and Upload to Pypi
-
-   #+BEGIN_SRC sh
-
-     # git commit ...
-     # git tag ...
-     python3 setup.py sdist bdist_wheel
-     twine upload dist/*
-     git clean -xdf
-
-   #+END_SRC
