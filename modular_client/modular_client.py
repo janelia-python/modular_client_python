@@ -1,4 +1,3 @@
-from __future__ import print_function, division
 import serial
 import time
 import atexit
@@ -98,10 +97,7 @@ class ModularClient(object):
         self._serial_interface = SerialInterface(*args,**kwargs)
         atexit.register(self._exit_modular_client)
         self._method_dict = self._get_method_dict()
-        try:
-            self._method_dict_inv = dict([(v,k) for (k,v) in self._method_dict.items()])
-        except AttributeError:
-            self._method_dict_inv = dict([(v,k) for (k,v) in self._method_dict.iteritems()])
+        self._method_dict_inv = dict([(v,k) for (k,v) in self._method_dict.items()])
         self._create_methods()
         # store the device id to output during debugging
         self._device_id = self.get_device_id()
@@ -181,21 +177,20 @@ class ModularClient(object):
         method_dict = self._send_request_get_result(self._METHOD_ID_GET_METHOD_IDS)
         return method_dict
 
-    def _send_request_by_method_name(self,name,*args):
-        method_id = self._method_dict[name]
+    def _send_request_by_method_id(self,method_id,*args):
         method_args = [method_id]
         method_args.extend(args)
         result = self._send_request_get_result(*method_args)
         return result
 
-    def _method_func_base(self,method_name,*args):
+    def _method_func_base(self,method_id,*args):
         if len(args) == 1 and type(args[0]) is dict:
             args_dict = args[0]
             args_list = self._args_dict_to_list(args_dict)
         else:
             args_list = args
         try:
-            result = self._send_request_by_method_name(method_name,*args_list)
+            result = self._send_request_by_method_id(method_id,*args_list)
         except Exception as e:
             device_id = self._device_id
             port = self.get_port()
@@ -206,11 +201,11 @@ class ModularClient(object):
         return result
 
     def _create_methods(self):
-        self._method_func_dict = {}
         for method_id, method_name in sorted(self._method_dict_inv.items()):
-            method_func = functools.partial(self._method_func_base, method_name)
-            setattr(self,inflection.underscore(method_name),method_func)
-            self._method_func_dict[method_name] = method_func
+            method_func = functools.partial(self._method_func_base, method_id)
+            method_func.__name__ = inflection.underscore(method_name)
+            method_func.__doc__ = method_name
+            setattr(self,method_func.__name__,method_func)
 
     def _args_dict_to_list(self,args_dict):
         key_set = set(args_dict.keys())
