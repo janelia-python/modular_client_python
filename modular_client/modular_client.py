@@ -54,6 +54,7 @@ class ModularClient(object):
     _WRITE_READ_DELAY = 0.001
     _WRITE_WRITE_DELAY = 0.005
     _METHOD_ID_GET_METHOD_IDS = 0
+    _VERBOSE_HELP_STRING = '??'
 
     def __init__(self,*args,**kwargs):
         name = None
@@ -96,8 +97,6 @@ class ModularClient(object):
         t_start = time.time()
         self._serial_interface = SerialInterface(*args,**kwargs)
         atexit.register(self._exit_modular_client)
-        self._method_dict = self._get_method_dict()
-        self._method_dict_inv = dict([(v,k) for (k,v) in self._method_dict.items()])
         self._create_methods()
         # store the device id to output during debugging
         self._device_id = self.get_device_id()
@@ -175,6 +174,7 @@ class ModularClient(object):
 
     def _get_method_dict(self):
         method_dict = self._send_request_get_result(self._METHOD_ID_GET_METHOD_IDS)
+        method_dict = dict([(inflection.underscore(method_name),method_id) for (method_name,method_id) in method_dict.items()])
         return method_dict
 
     def _send_request_by_method_id(self,method_id,*args):
@@ -200,12 +200,20 @@ class ModularClient(object):
             raise e from Exception(error_message)
         return result
 
+    def _create_method_docstring(self,method_name,method_id):
+        docstring = method_name + '\n\n'
+        method_verbose_help = self._send_request_get_result(method_id,self._VERBOSE_HELP_STRING)
+        # if 'parameters' in method_verbose_help:
+        #     docstring += ':param {0}'.format()
+        return docstring
+
     def _create_methods(self):
-        for method_id, method_name in sorted(self._method_dict_inv.items()):
+        self._method_dict = self._get_method_dict()
+        for method_name, method_id in sorted(self._method_dict.items()):
             method_func = functools.partial(self._method_func_base, method_id)
-            method_func.__name__ = inflection.underscore(method_name)
-            method_func.__doc__ = method_name
-            setattr(self,method_func.__name__,method_func)
+            method_func.__name__ = method_name
+            method_func.__doc__ = self._create_method_docstring(method_name,method_id)
+            setattr(self,method_name,method_func)
 
     def _args_dict_to_list(self,args_dict):
         key_set = set(args_dict.keys())
@@ -229,7 +237,7 @@ class ModularClient(object):
         '''
         Get a list of modular methods automatically attached as class methods.
         '''
-        return [inflection.underscore(key) for key in list(self._method_dict.keys())]
+        return sorted(list(self._method_dict.keys()))
 
     def call_get_result(self,method_name,*args):
         method_name = inflection.camelize(method_name,False)
