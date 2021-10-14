@@ -200,11 +200,8 @@ class ModularClient(object):
             raise e from Exception(error_message)
         return result
 
-    def _create_method_docstring(self,method_name,method_id):
-        docstring = method_name + '\n\n'
-        method_verbose_help = self._send_request_get_result(method_id,self._VERBOSE_HELP_STRING)
-        # if 'parameters' in method_verbose_help:
-        #     docstring += ':param {0}'.format()
+    def _create_method_docstring(self,method_id):
+        docstring = str(self._send_request_get_result(method_id,self._VERBOSE_HELP_STRING))
         return docstring
 
     def _create_methods(self):
@@ -212,7 +209,7 @@ class ModularClient(object):
         for method_name, method_id in sorted(self._method_dict.items()):
             method_func = functools.partial(self._method_func_base, method_id)
             method_func.__name__ = method_name
-            method_func.__doc__ = self._create_method_docstring(method_name,method_id)
+            method_func.__doc__ = self._create_method_docstring(method_id)
             setattr(self,method_name,method_func)
 
     def _args_dict_to_list(self,args_dict):
