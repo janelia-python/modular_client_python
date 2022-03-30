@@ -4,7 +4,7 @@
 
 * Package Information
 - Name :: modular_client_python
-- Version :: 8.4.0
+- Version :: 8.4.1
 - License :: BSD
 - URL :: https://github.com/janelia-pypi/modular_client_python
 - Author :: Peter Polidoro
@@ -90,6 +90,20 @@ pip install modular_client
 python3 -m venv C:\venvs\modular_client
 C:\venvs\modular_client\Scripts\activate
 pip install modular_client
+
+#+END_SRC
+
+* Development
+
+** Guix
+
+#+BEGIN_SRC sh
+
+guix time-machine -C channels.scm -- shell --pure -D -f guix.scm
+python3 setup.py sdist bdist_wheel
+twine upload dist/*
+git clean -xdf
+exit
 
 #+END_SRC
 

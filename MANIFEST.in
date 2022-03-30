@@ -1,1 +1,3 @@
-global-exclude .git*
+include DESCRIPTION.rst
+include README.org
+include LICENSE

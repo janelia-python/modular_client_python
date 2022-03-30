@@ -11,8 +11,7 @@ with codecs.open(here.joinpath('DESCRIPTION.rst'), encoding='utf-8') as f:
 setuptools.setup(
     name='modular_client',
 
-    use_scm_version = True,
-    setup_requires=['setuptools_scm'],
+    version = '8.4.1',
 
     description='Modular device Python client interface for communicating with and calling remote methods on modular device servers.',
     long_description=long_description,
