@@ -24,7 +24,6 @@
    (native-inputs (list python-wheel python-twine python-ipython git))
    (propagated-inputs
     (list python-inflection
-          python-pyserial
           python-serial-interface
           python-sre-yield))
    (home-page "")

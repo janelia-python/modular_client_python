@@ -4,7 +4,7 @@
 
 * Package Information
 - Name :: modular_client_python
-- Version :: 8.4.2
+- Version :: 8.4.3
 - License :: BSD
 - URL :: https://github.com/janelia-pypi/modular_client_python
 - Author :: Peter Polidoro
@@ -102,6 +102,7 @@ pip install modular_client
 guix time-machine -C channels.scm -- shell --pure -D -f guix.scm
 python3 setup.py sdist bdist_wheel
 twine upload dist/*
+git add --all
 git clean -xdf
 exit
 
