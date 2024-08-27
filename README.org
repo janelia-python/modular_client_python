@@ -6,7 +6,7 @@
 - Name :: modular_client_python
 - Version :: 8.4.3
 - License :: BSD
-- URL :: https://github.com/janelia-pypi/modular_client_python
+- URL :: https://github.com/janelia-python/modular_client_python
 - Author :: Peter Polidoro
 - Email :: peter@polidoro.io
 
@@ -67,7 +67,7 @@ dev = devs['/dev/ttyACM0']
 
 * Installation
 
-[[https://github.com/janelia-pypi/python_setup]]
+[[https://github.com/janelia-python/python_setup]]
 
 ** Install Arduino and Teensyduino on your Host Machine
 

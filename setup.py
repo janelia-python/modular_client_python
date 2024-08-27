@@ -16,7 +16,7 @@ setuptools.setup(
     description='Modular device Python client interface for communicating with and calling remote methods on modular device servers.',
     long_description=long_description,
 
-    url='https://github.com/janelia-pypi/modular_client_python',
+    url='https://github.com/janelia-python/modular_client_python',
 
     author='Peter Polidoro',
     author_email='peter@polidoro.io',
